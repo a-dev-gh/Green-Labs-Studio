@@ -2,7 +2,7 @@
 
 Succulent store website for **GREENLABS Botanics** — Santiago de los Caballeros, Dominican Republic.
 
-Built for Oscar Junior Espinosa. Orders are fulfilled via WhatsApp. The site includes a full product catalog, event souvenir service, authenticated customer accounts, and a CMS admin dashboard for Oscar to manage all content.
+Built for O. E. Orders are fulfilled via WhatsApp. The site includes a full product catalog, event souvenir service, authenticated customer accounts, and a CMS admin dashboard for Oscar to manage all content.
 
 ---
 
