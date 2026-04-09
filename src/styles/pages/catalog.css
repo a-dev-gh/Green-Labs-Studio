@@ -1,0 +1,90 @@
+.catalog {
+  padding: calc(var(--navbar-height) + var(--space-8)) var(--container-pad) var(--space-24);
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+.catalog__title {
+  font-family: var(--font-editorial);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-forest);
+  text-align: center;
+  margin-bottom: var(--space-2);
+}
+
+.catalog__subtitle {
+  text-align: center;
+  color: var(--color-gray-500);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-8);
+}
+
+.catalog__pills {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-8);
+  scrollbar-width: none;
+  justify-content: center;
+}
+
+.catalog__pills::-webkit-scrollbar {
+  display: none;
+}
+
+.catalog__pill {
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  background: var(--color-white);
+  color: var(--color-forest);
+  border: 1.5px solid var(--color-sand-dark);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.catalog__pill:hover {
+  border-color: var(--color-olive);
+}
+
+.catalog__pill--active {
+  background: var(--color-forest);
+  color: var(--color-sand);
+  border-color: var(--color-forest);
+}
+
+.catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .catalog__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .catalog__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.product-card__placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-olive-light), var(--color-forest-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-editorial);
+  font-size: var(--text-2xl);
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+}

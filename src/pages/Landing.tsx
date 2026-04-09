@@ -1,3 +1,321 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import heroImg from '../../assets/hero-oscar-1.webp';
+import aboutImg from '../../assets/about-me.webp';
+import imgHercules from '../../assets/IMG_6745.JPG.webp';
+import imgPerle from '../../assets/IMG_6739.JPG.webp';
+import imgOrgyalis from '../../assets/IMG_6743.JPG.webp';
+import imgTomentosa from '../../assets/IMG_6744.JPG.webp';
+import '../styles/pages/landing.css';
+
+const products = [
+  { name: "Echeveria 'Hercules'", scientific: 'Echeveria', price: 'RD$ 550', img: imgHercules },
+  { name: "Echeveria 'Perle von Nürnberg'", scientific: 'Echeveria', price: 'RD$ 480', img: imgPerle },
+  { name: 'Kalanchoe orgyalis', scientific: 'Kalanchoe', price: 'RD$ 420', img: imgOrgyalis },
+  { name: 'Kalanchoe tomentosa', scientific: 'Kalanchoe', price: 'RD$ 380', img: imgTomentosa },
+];
+
+const testimonials = [
+  { text: 'Mis suculentas llegaron perfectas. El empaque fue increíble.', name: 'María R.' },
+  { text: 'Greenlabs me enseñó a cuidar mis suculentas. Ahora tengo 12.', name: 'Carlos M.' },
+  { text: 'La mejor tienda de suculentas en Santiago.', name: 'Ana P.' },
+];
+
+const souvenirPackages = [
+  { icon: '💍', name: 'Boda', price: 'RD$ 250/u', detail: 'Mínimo 20 unidades' },
+  { icon: '🎂', name: 'Cumpleaños', price: 'RD$ 200/u', detail: 'Mínimo 10 unidades' },
+  { icon: '🏢', name: 'Corporativo', price: 'RD$ 350/u', detail: 'Mínimo 15 unidades' },
+];
+
+function CanvasBackground({ scrollProgress, darkBlend }: { scrollProgress: number; darkBlend: number }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const cv = ref.current;
+    if (!cv) return;
+    const dpr = window.devicePixelRatio || 1;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    cv.width = vw * dpr;
+    cv.height = vh * dpr;
+    cv.style.width = vw + 'px';
+    cv.style.height = vh + 'px';
+    const ctx = cv.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, vw, vh);
+
+    const cx = vw / 2;
+    const baseY = vh + 20;
+    const blend = darkBlend * darkBlend * (3 - 2 * darkBlend); // smoothstep
+
+    const leaves = [
+      { angle: -62, len: vh * 0.55, w: vh * 0.09, rgb: [82, 183, 136], t: -1, preGrown: true },
+      { angle: 62, len: vh * 0.53, w: vh * 0.085, rgb: [82, 183, 136], t: -1, preGrown: true },
+      { angle: -33, len: vh * 0.48, w: vh * 0.08, rgb: [64, 145, 108], t: 0.08 },
+      { angle: 33, len: vh * 0.46, w: vh * 0.075, rgb: [64, 145, 108], t: 0.12 },
+      { angle: -8, len: vh * 0.42, w: vh * 0.07, rgb: [45, 106, 79], t: 0.28 },
+      { angle: 8, len: vh * 0.40, w: vh * 0.065, rgb: [45, 106, 79], t: 0.33 },
+    ];
+
+    leaves.forEach(lf => {
+      let ease = 1;
+      if (!lf.preGrown) {
+        if (scrollProgress < lf.t) return;
+        const lp = Math.min(1, (scrollProgress - lf.t) / 0.12);
+        ease = 1 - Math.pow(1 - lp, 3);
+      }
+      const rad = (lf.angle * Math.PI) / 180;
+      const cLen = lf.len * ease;
+      const cW = lf.w * ease;
+      const tipX = cx + Math.sin(rad) * cLen;
+      const tipY = baseY - Math.cos(rad) * cLen;
+      const px = Math.cos(rad), py = Math.sin(rad);
+      const mx = cx + Math.sin(rad) * cLen * 0.45;
+      const my = baseY - Math.cos(rad) * cLen * 0.45;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, baseY);
+      ctx.quadraticCurveTo(mx + px * cW, my + py * cW, tipX, tipY);
+      ctx.quadraticCurveTo(mx - px * cW, my - py * cW, cx, baseY);
+      ctx.closePath();
+
+      const [r, g, b] = lf.rgb;
+      const lr = r + (240 - r) * blend;
+      const lg = g + (248 - g) * blend;
+      const lb = b + (244 - b) * blend;
+
+      const grad = ctx.createLinearGradient(cx, baseY, tipX, tipY);
+      grad.addColorStop(0, `rgba(${lr},${lg},${lb},0.75)`);
+      grad.addColorStop(0.5, `rgba(${lr},${lg},${lb},0.55)`);
+      grad.addColorStop(1, `rgba(${lr},${lg},${lb},0.25)`);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.strokeStyle = `rgba(${lr},${lg},${lb},0.35)`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      if (ease > 0.25) {
+        ctx.beginPath();
+        ctx.moveTo(cx, baseY);
+        ctx.lineTo(cx + Math.sin(rad) * cLen * 0.8, baseY - Math.cos(rad) * cLen * 0.8);
+        const va = blend > 0.5 ? 0.3 : 0.2;
+        ctx.strokeStyle = blend > 0.5 ? `rgba(255,255,255,${va})` : `rgba(216,243,220,${va})`;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        if (ease > 0.45) {
+          for (let v = 0.2; v < 0.65; v += 0.15) {
+            const vx = cx + Math.sin(rad) * cLen * v;
+            const vy = baseY - Math.cos(rad) * cLen * v;
+            ctx.beginPath(); ctx.moveTo(vx, vy);
+            ctx.lineTo(vx + px * cW * 0.4, vy + py * cW * 0.4);
+            ctx.strokeStyle = blend > 0.5 ? 'rgba(255,255,255,0.15)' : 'rgba(216,243,220,0.12)';
+            ctx.lineWidth = 0.6; ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(vx, vy);
+            ctx.lineTo(vx - px * cW * 0.4, vy - py * cW * 0.4);
+            ctx.stroke();
+          }
+        }
+      }
+    });
+
+    // Center bud
+    const budR = 45 + (220 - 45) * blend;
+    const budG = 106 + (230 - 106) * blend;
+    const budB = 79 + (225 - 79) * blend;
+    ctx.beginPath(); ctx.ellipse(cx, baseY, 20, 14, 0, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${budR},${budG},${budB},0.4)`; ctx.fill();
+  }, [scrollProgress, darkBlend]);
+
+  return <canvas ref={ref} className="canvas-bg" />;
+}
+
 export default function Landing() {
-  return <div className="page page--landing"><h1>Landing</h1></div>;
+  const [scrollProg, setScrollProg] = useState(0);
+  const [darkBlend, setDarkBlend] = useState(0);
+  const [heroSlide, setHeroSlide] = useState(0);
+  const [tSlide, setTSlide] = useState(0);
+  const testiRef = useRef<HTMLElement>(null);
+
+  const handleScroll = useCallback(() => {
+    const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const prog = totalHeight > 0 ? window.scrollY / totalHeight : 0;
+    setScrollProg(Math.max(0, Math.min(1, prog)));
+
+    if (testiRef.current) {
+      const rect = testiRef.current.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const start = vh;
+      const end = vh * 0.4;
+      const raw = 1 - (rect.top - end) / (start - end);
+      const clamped = Math.max(0, Math.min(1, raw));
+      const quantized = Math.round(clamped * 100) / 100;
+      setDarkBlend(quantized);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    const t = setInterval(() => setHeroSlide(s => (s + 1) % products.length), 3500);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => setTSlide(s => (s + 1) % testimonials.length), 4500);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <CanvasBackground scrollProgress={scrollProg} darkBlend={darkBlend} />
+
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        {/* Hero */}
+        <section className="hero">
+          {products.map((p, i) => (
+            <div key={i}
+              className={`hero__float ${heroSlide === i ? 'hero__float--visible' : ''}`}
+              style={{
+                top: `${18 + (i * 8)}%`,
+                [i % 2 === 0 ? 'left' : 'right']: '5%',
+                width: '80px', height: '80px',
+                borderRadius: '50%',
+              }}
+            >
+              <img src={p.img} alt={p.name} className="hero__float-img" />
+            </div>
+          ))}
+
+          <p className="hero__eyebrow">Greenlabs Botanics</p>
+          <h1 className="hero__title">Tu próxima suculenta</h1>
+          <h1 className="hero__title hero__title--accent">te espera</h1>
+          <p className="hero__subtitle">
+            Suculentas seleccionadas con amor en Santiago de los Caballeros. Encuentra la suculenta perfecta para tu espacio.
+          </p>
+          <Link to="/catalogo" className="hero__cta">Descubre tu suculenta →</Link>
+        </section>
+
+        {/* About */}
+        <section className="about">
+          <div className="about__inner">
+            <p className="about__eyebrow">Nosotros</p>
+            <h2 className="about__title">
+              Una marca que enseña a <span className="about__title-accent">cuidar</span>
+            </h2>
+            <div className="about__grid">
+              <div>
+                <p className="about__text">
+                  Greenlabs Botanics nació de la pasión por las suculentas y la educación botánica. Cada suculenta viene con una guía de cuidado personalizada.
+                </p>
+                <p className="about__text">
+                  Desde Santiago de los Caballeros, cultivamos y seleccionamos las mejores variedades para que tu espacio cobre vida.
+                </p>
+                <div className="about__stats">
+                  {[{ n: '200+', l: 'Suculentas' }, { n: '50+', l: 'Clientes' }, { n: '15', l: 'Variedades' }].map((s, i) => (
+                    <div key={i}>
+                      <div className="about__stat-number">{s.n}</div>
+                      <div className="about__stat-label">{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <img src={aboutImg} alt="Oscar - GREENLABS" className="about__photo" />
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Products */}
+        <section className="featured">
+          <div className="featured__inner">
+            <p className="featured__eyebrow">Catálogo</p>
+            <h2 className="featured__title">
+              Nuestras <span className="featured__title-accent">suculentas</span>
+            </h2>
+            <p className="featured__desc">Seleccionadas a mano con guía de cuidado incluida.</p>
+            <div className="featured__grid">
+              {products.map((p, i) => (
+                <div key={i} className="product-card">
+                  <div className="product-card__image-wrap">
+                    <img src={p.img} alt={p.name} className="product-card__image" />
+                  </div>
+                  <div className="product-card__body">
+                    <h3 className="product-card__name">{p.name}</h3>
+                    <p className="product-card__scientific">{p.scientific}</p>
+                    <div className="product-card__footer">
+                      <span className="product-card__price">{p.price}</span>
+                      <div className="product-card__add">+</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Souvenir Mini Section */}
+        <section className="souvenir-mini">
+          <div className="souvenir-mini__inner">
+            <p className="souvenir-mini__eyebrow">Servicio</p>
+            <h2 className="souvenir-mini__title">
+              Suculentas para tus <span className="souvenir-mini__title-accent">eventos</span>
+            </h2>
+            <p className="souvenir-mini__desc">
+              Souvenirs únicos de suculentas para bodas, cumpleaños y eventos corporativos. Cada pieza personalizada con amor.
+            </p>
+            <div className="souvenir-mini__cards">
+              {souvenirPackages.map((pkg, i) => (
+                <div key={i} className="souvenir-card">
+                  <div className="souvenir-card__icon">{pkg.icon}</div>
+                  <h3 className="souvenir-card__name">{pkg.name}</h3>
+                  <p className="souvenir-card__price">{pkg.price}</p>
+                  <p className="souvenir-card__detail">{pkg.detail}</p>
+                </div>
+              ))}
+            </div>
+            <Link to="/servicios" className="souvenir-mini__cta">Conoce nuestros paquetes →</Link>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section className="testimonials" ref={testiRef}>
+          <div className="testimonials__inner">
+            <p className="testimonials__eyebrow">Testimonios</p>
+            <h2 className="testimonials__title">
+              Lo que dicen nuestros <span className="testimonials__title-accent">clientes</span>
+            </h2>
+            <div className="testimonials__slider">
+              {testimonials.map((t, i) => (
+                <div key={i} className={`testimonials__slide ${i === tSlide ? 'testimonials__slide--active' : ''}`}>
+                  <p className="testimonials__quote">"{t.text}"</p>
+                  <p className="testimonials__author">{t.name}</p>
+                </div>
+              ))}
+            </div>
+            <div className="testimonials__dots">
+              {testimonials.map((_, i) => (
+                <button key={i} onClick={() => setTSlide(i)}
+                  className={`testimonials__dot ${i === tSlide ? 'testimonials__dot--active' : ''}`} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* WhatsApp CTA */}
+        <section className="wa-cta">
+          <h2 className="wa-cta__title">
+            ¿Lista para tu primera <span className="wa-cta__title-accent">suculenta</span>?
+          </h2>
+          <p className="wa-cta__subtitle">Escríbenos y te ayudamos a elegir.</p>
+          <a href="#" className="wa-cta__btn">Escríbenos por WhatsApp</a>
+        </section>
+      </div>
+    </div>
+  );
 }

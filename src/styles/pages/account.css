@@ -1,0 +1,199 @@
+.account-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: var(--navbar-height);
+}
+
+@media (min-width: 768px) {
+  .account-layout {
+    flex-direction: row;
+  }
+}
+
+.account-layout__sidebar {
+  background: var(--color-forest);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+  overflow-x: auto;
+}
+
+@media (min-width: 768px) {
+  .account-layout__sidebar {
+    width: 220px;
+    flex-direction: column;
+    padding: var(--space-8) var(--space-6);
+    min-height: calc(100vh - var(--navbar-height));
+    gap: var(--space-1);
+    overflow-x: visible;
+  }
+}
+
+.account-layout__title {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .account-layout__title {
+    display: block;
+    font-family: var(--font-editorial);
+    font-size: var(--text-lg);
+    color: var(--color-sand);
+    margin-bottom: var(--space-6);
+  }
+}
+
+.account-layout__nav {
+  display: flex;
+  gap: var(--space-1);
+  flex-direction: row;
+}
+
+@media (min-width: 768px) {
+  .account-layout__nav {
+    flex-direction: column;
+  }
+}
+
+.account-layout__link {
+  color: rgba(245, 240, 232, 0.65);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.account-layout__link:hover,
+.account-layout__link.active {
+  color: var(--color-sand);
+  background: rgba(245, 240, 232, 0.1);
+}
+
+.account-layout__content {
+  flex: 1;
+  padding: var(--space-8) var(--container-pad) var(--space-24);
+}
+
+/* Account page common */
+.account-page__title {
+  font-family: var(--font-editorial);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-forest);
+  margin-bottom: var(--space-6);
+}
+
+.account-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.account-page__header .account-page__title {
+  margin-bottom: 0;
+}
+
+/* Profile */
+.profile__avatar {
+  margin-bottom: var(--space-6);
+}
+
+.profile__avatar-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-forest);
+  color: var(--color-sand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-editorial);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.profile-form,
+.settings-form {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Settings */
+.settings__section {
+  margin-bottom: var(--space-10);
+  padding-bottom: var(--space-10);
+  border-bottom: 1px solid var(--color-sand-dark);
+}
+
+.settings__section--danger {
+  border-bottom: none;
+}
+
+.settings__section-title {
+  font-family: var(--font-editorial);
+  font-size: var(--text-lg);
+  color: var(--color-forest);
+  margin-bottom: var(--space-4);
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: var(--space-16) 0;
+}
+
+.empty-state__icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+  opacity: 0.4;
+}
+
+.empty-state__title {
+  font-family: var(--font-editorial);
+  font-size: var(--text-xl);
+  color: var(--color-forest);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state__text {
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+  margin-bottom: var(--space-6);
+}
+
+/* Wishlist */
+.wishlists__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.wishlist-card {
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  border: 1px solid var(--color-sand-dark);
+  transition: box-shadow var(--transition-normal);
+}
+
+.wishlist-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.wishlist-card__name {
+  font-family: var(--font-editorial);
+  font-size: var(--text-base);
+  color: var(--color-forest);
+  margin-bottom: var(--space-1);
+}
+
+.wishlist-card__count {
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
+}
