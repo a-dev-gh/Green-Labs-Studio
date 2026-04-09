@@ -1,0 +1,169 @@
+# GREENLABS.Studio
+
+Succulent store website for **GREENLABS Botanics** — Santiago de los Caballeros, Dominican Republic.
+
+Built for Oscar Junior Espinosa. Orders are fulfilled via WhatsApp. The site includes a full product catalog, event souvenir service, authenticated customer accounts, and a CMS admin dashboard for Oscar to manage all content.
+
+---
+
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?style=flat&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat&logo=vite&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20DB%20%2B%20Storage-3ECF8E?style=flat&logo=supabase&logoColor=white)
+![CSS](https://img.shields.io/badge/CSS-Custom%20%2F%20BEM-1572B6?style=flat&logo=css3&logoColor=white)
+
+---
+
+## Features
+
+- **Product Catalog** — Filterable succulent grid with category pills, search, sorting, and individual product detail pages with care guides
+- **WhatsApp Ordering** — Cart checkout generates a formatted WhatsApp message sent directly to the store
+- **Souvenir Service** — Dedicated page for event souvenir packages (weddings, birthdays, corporate) with WhatsApp inquiry CTA
+- **User Accounts** — Authenticated customers can manage their cart, saved wishlists, and view order history
+- **Admin CMS Dashboard** — Oscar manages products, categories, services, proposals, testimonials, and landing page content — no code required
+- **Scrollytelling Leaf Animation** — Animated floating leaves on the landing hero transition to white when entering the dark testimonials section
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- A Supabase project with the schema applied (see `supabase/migrations/`)
+
+### Installation
+
+```bash
+git clone https://github.com/a-dev-gh/Green-Labs-Studio.git
+cd Green-Labs-Studio
+npm install
+```
+
+### Environment Setup
+
+Copy the example env file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+Then open `.env` and add your credentials (see table below).
+
+### Development
+
+```bash
+npm run dev
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+---
+
+## Environment Variables
+
+| Variable | Description | Required |
+|---|---|---|
+| `VITE_SUPABASE_URL` | Your Supabase project URL | Yes |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon/public API key | Yes |
+| `VITE_WHATSAPP_NUMBER` | WhatsApp number for orders (e.g. `18091234567`) | Yes |
+
+All three variables are required for the app to function. None of these values are committed to the repository.
+
+---
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── layout/         # PublicLayout, AdminLayout, Navbar, Footer, BottomNav
+│   ├── auth/           # ProtectedRoute, AdminRoute, Login/Signup/Reset forms
+│   ├── landing/        # Hero, LeafAnimation, FeaturedProducts, Testimonials, CTAs
+│   ├── catalog/        # ProductGrid, ProductCard, ProductFilters, CategoryPills
+│   ├── product/        # ProductImages, ProductInfo, CareGuide, AddToCart, RelatedProducts
+│   ├── services/       # ServiceCard, SouvenirPackageCard, ServiceWhatsAppCTA
+│   ├── cart/           # CartItemList, CartSummary, WhatsAppCheckout
+│   ├── account/        # ProfileForm, OrderHistory, WishlistList, SettingsForm
+│   ├── admin/          # Full CMS: DataTable, AdminFormModal, ImageUploader, RichTextEditor
+│   └── ui/             # Button, Input, Modal, Drawer, Toast, Spinner, Skeleton, Badge, etc.
+├── pages/              # Route-level page components
+├── core/
+│   ├── auth/           # AuthProvider, useAuth, authService
+│   ├── cart/           # CartProvider, useCart
+│   ├── wishlist/       # WishlistProvider, useWishlist
+│   └── supabase.ts     # Supabase client instance
+├── hooks/              # useProducts, useCategories, useScrollAnimation, useDebounce, etc.
+├── lib/                # whatsapp.ts, formatters.ts, validators.ts, constants.ts, types.ts
+├── styles/             # tokens.css + BEM component stylesheets
+├── router.tsx
+├── App.tsx
+└── main.tsx
+```
+
+---
+
+## Design System
+
+### Brand Colors
+
+| Token | Hex | Usage |
+|---|---|---|
+| `--color-forest` | `#1B4332` | Primary brand, headers, dark backgrounds |
+| `--color-olive` | `#8BA740` | Accents, badges, active states |
+| `--color-coral` | `#EF583D` | CTAs, WhatsApp buttons, highlights |
+| `--color-sand` | `#F5F0E8` | Page backgrounds, cards |
+
+### Typography
+
+| Token | Value | Usage |
+|---|---|---|
+| `--font-ui` | `DM Sans, sans-serif` | All UI text, buttons, labels |
+| `--font-editorial` | `Lora, serif` | Headings, scientific names, editorial copy |
+
+### Spacing and Shape
+
+- Base grid: 8px (`--space-2: 0.5rem`)
+- Border radius: 12px (`--radius-md`)
+- Approach: Mobile-first, with breakpoints at 640px, 1024px, and 1280px
+- Styling: Custom CSS with BEM class naming — no utility frameworks
+
+---
+
+## Database
+
+13 Supabase tables with Row-Level Security (RLS) enabled on all of them:
+
+| Table | Description |
+|---|---|
+| `profiles` | Customer and admin user profiles, linked to `auth.users` |
+| `categories` | Succulent categories with slugs and sort order |
+| `products` | Succulents with pricing, images, care guide, stock, and category |
+| `orders` | Customer orders with status tracking and WhatsApp flag |
+| `order_items` | Line items per order with price snapshot |
+| `cart_items` | Persistent cart, one row per user/product pair |
+| `wishlists` | Named wishlists per user |
+| `wishlist_items` | Products saved to a wishlist |
+| `services` | Service offerings (e.g. event arrangements) |
+| `souvenir_packages` | Event souvenir bundles with pricing and minimums |
+| `testimonials` | Customer reviews shown on landing page |
+| `cms_content` | JSONB content blocks for editable landing/about sections |
+| `proposals` | Curated featured collections with product arrays |
+
+Auth uses Supabase email/password. Two roles: `admin` (Oscar — full CMS access) and `user` (customers — cart, wishlists, orders). Role is stored in `profiles.role`.
+
+---
+
+## License
+
+Private — All rights reserved. This codebase is proprietary to GREENLABS Botanics. Unauthorized use, distribution, or reproduction is prohibited.
+
+---
+
+## Built By
+
+**Adrian Alexander** — Axiom Studio

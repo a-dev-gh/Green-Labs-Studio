@@ -1,0 +1,47 @@
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-pad);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* -- Section spacing -- */
+.section {
+  padding: var(--space-20) var(--container-pad);
+}
+
+.section--dark {
+  background-color: var(--color-forest);
+  color: var(--color-white);
+}
+
+/* -- Typography utility -- */
+.text-editorial {
+  font-family: var(--font-editorial);
+}
+
+.text-ui {
+  font-family: var(--font-ui);
+}
+
+/* -- Label / Eyebrow -- */
+.eyebrow {
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--color-olive);
+  margin-bottom: var(--space-3);
+}
