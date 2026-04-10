@@ -19,13 +19,14 @@ export default function Navbar() {
   return (
     <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
       <Link to="/" className="navbar__brand">
-        <div className="navbar__logo">G</div>
+        <img src="/logo-icon.webp" alt="GREENLABS" className="navbar__logo-img" />
         <span className="navbar__name">GREENLABS</span>
       </Link>
 
       <div className="navbar__links">
         <Link to="/catalogo" className="navbar__link">Catálogo</Link>
         <Link to="/servicios" className="navbar__link">Servicios</Link>
+        <Link to="/blog" className="navbar__link">Blog</Link>
       </div>
 
       <div className="navbar__actions">

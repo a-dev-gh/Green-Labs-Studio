@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom';
+import servicesPotted from '../../assets/services-potted.webp';
+import souvenirGift from '../../assets/souvenir-gift-wrap.webp';
+import souvenirCollection from '../../assets/souvenir-collection.webp';
 import '../styles/pages/services.css';
 import '../styles/components/button.css';
 
 const packages = [
-  { icon: '💍', name: 'Boda', desc: 'Suculentas elegantes como recuerdo para tus invitados. Personalizadas con etiquetas y macetas decorativas.', price: 'RD$ 250/u', min: 'Mínimo 20 unidades' },
-  { icon: '🎂', name: 'Cumpleaños', desc: 'Mini suculentas perfectas como souvenirs de cumpleaños. Variedad de especies y presentaciones.', price: 'RD$ 200/u', min: 'Mínimo 10 unidades' },
-  { icon: '🏢', name: 'Corporativo', desc: 'Suculentas premium para eventos empresariales, conferencias y regalos corporativos.', price: 'RD$ 350/u', min: 'Mínimo 15 unidades' },
+  { icon: '💍', name: 'Boda', desc: 'Suculentas elegantes como recuerdo para tus invitados. Personalizadas con etiquetas y macetas decorativas.', price: 'RD$ 250/u', min: 'Mínimo 20 unidades', img: souvenirGift },
+  { icon: '🎂', name: 'Cumpleaños', desc: 'Mini suculentas perfectas como souvenirs de cumpleaños. Variedad de especies y presentaciones.', price: 'RD$ 200/u', min: 'Mínimo 10 unidades', img: souvenirCollection },
+  { icon: '🏢', name: 'Corporativo', desc: 'Suculentas premium para eventos empresariales, conferencias y regalos corporativos.', price: 'RD$ 350/u', min: 'Mínimo 15 unidades', img: servicesPotted },
 ];
 
 export default function Services() {
@@ -25,6 +28,7 @@ export default function Services() {
       <div className="services__grid">
         {packages.map((pkg, i) => (
           <div key={i} className="service-card">
+            {pkg.img && <img src={pkg.img} alt={pkg.name} className="service-card__img" />}
             <div className="service-card__icon">{pkg.icon}</div>
             <h3 className="service-card__name">{pkg.name}</h3>
             <p className="service-card__desc">{pkg.desc}</p>

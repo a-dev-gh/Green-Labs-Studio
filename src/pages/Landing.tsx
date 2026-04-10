@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import heroImg from '../../assets/hero-oscar-1.webp';
-import aboutImg from '../../assets/about-me.webp';
-import imgHercules from '../../assets/IMG_6745.JPG.webp';
-import imgPerle from '../../assets/IMG_6739.JPG.webp';
-import imgOrgyalis from '../../assets/IMG_6743.JPG.webp';
-import imgTomentosa from '../../assets/IMG_6744.JPG.webp';
+import heroImg from '../../assets/hero-oscar.webp';
+import aboutImg from '../../assets/about-oscar.webp';
+import imgHercules from '../../assets/echeveria-hercules.webp';
+import imgPerle from '../../assets/echeveria-perle.webp';
+import imgOrgyalis from '../../assets/kalanchoe-orgyalis.webp';
+import imgTomentosa from '../../assets/kalanchoe-tomentosa.webp';
+import souvenirGift from '../../assets/souvenir-gift-wrap.webp';
+import souvenirCollection from '../../assets/souvenir-collection.webp';
+import servicesPotted from '../../assets/services-potted.webp';
 import '../styles/pages/landing.css';
 
 const products = [
@@ -162,8 +165,14 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
+  // Plants grow in one at a time, accumulating. After all 4 are visible, reset and start over.
   useEffect(() => {
-    const t = setInterval(() => setHeroSlide(s => (s + 1) % products.length), 3500);
+    const t = setInterval(() => {
+      setHeroSlide(s => {
+        if (s >= products.length - 1) return -1; // reset: all hidden, then first grows next tick
+        return s + 1;
+      });
+    }, 2500);
     return () => clearInterval(t);
   }, []);
 
@@ -179,27 +188,31 @@ export default function Landing() {
       <div style={{ position: 'relative', zIndex: 1 }}>
         {/* Hero */}
         <section className="hero">
-          {products.map((p, i) => (
-            <div key={i}
-              className={`hero__float ${heroSlide === i ? 'hero__float--visible' : ''}`}
-              style={{
-                top: `${18 + (i * 8)}%`,
-                [i % 2 === 0 ? 'left' : 'right']: '5%',
-                width: '80px', height: '80px',
-                borderRadius: '50%',
-              }}
-            >
-              <img src={p.img} alt={p.name} className="hero__float-img" />
+          {/* Left: Oscar + plants growing around him */}
+          <div className="hero__visual">
+            <div className="hero__oscar-wrap">
+              <img src={heroImg} alt="Oscar - GREENLABS" className="hero__oscar" />
             </div>
-          ))}
+            {products.map((p, i) => (
+              <img
+                key={i}
+                src={p.img}
+                alt={p.name}
+                className={`hero__plant hero__plant--pos${i} ${heroSlide >= i ? 'hero__plant--visible' : ''}`}
+              />
+            ))}
+          </div>
 
-          <p className="hero__eyebrow">Greenlabs Botanics</p>
-          <h1 className="hero__title">Tu próxima suculenta</h1>
-          <h1 className="hero__title hero__title--accent">te espera</h1>
-          <p className="hero__subtitle">
-            Suculentas seleccionadas con amor en Santiago de los Caballeros. Encuentra la suculenta perfecta para tu espacio.
-          </p>
-          <Link to="/catalogo" className="hero__cta">Descubre tu suculenta →</Link>
+          {/* Right: text + CTA */}
+          <div className="hero__info">
+            <p className="hero__eyebrow">Greenlabs Botanics</p>
+            <h1 className="hero__title">Tu próxima<br />suculenta</h1>
+            <h1 className="hero__title hero__title--accent">te espera</h1>
+            <p className="hero__subtitle">
+              Suculentas seleccionadas con amor en Santiago de los Caballeros. Encuentra la suculenta perfecta para tu espacio.
+            </p>
+            <Link to="/catalogo" className="hero__cta">Descubre tu suculenta →</Link>
+          </div>
         </section>
 
         {/* About */}
@@ -259,27 +272,59 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Souvenir Mini Section */}
+        {/* Souvenir Sections */}
         <section className="souvenir-mini">
           <div className="souvenir-mini__inner">
             <p className="souvenir-mini__eyebrow">Servicio</p>
             <h2 className="souvenir-mini__title">
               Suculentas para tus <span className="souvenir-mini__title-accent">eventos</span>
             </h2>
-            <p className="souvenir-mini__desc">
-              Souvenirs únicos de suculentas para bodas, cumpleaños y eventos corporativos. Cada pieza personalizada con amor.
-            </p>
-            <div className="souvenir-mini__cards">
-              {souvenirPackages.map((pkg, i) => (
-                <div key={i} className="souvenir-card">
-                  <div className="souvenir-card__icon">{pkg.icon}</div>
-                  <h3 className="souvenir-card__name">{pkg.name}</h3>
-                  <p className="souvenir-card__price">{pkg.price}</p>
-                  <p className="souvenir-card__detail">{pkg.detail}</p>
-                </div>
-              ))}
+          </div>
+
+          <div className="souvenir-section">
+            <div className="souvenir-section__img-wrap">
+              <img src={souvenirGift} alt="Souvenirs para Bodas" className="souvenir-section__img" />
             </div>
-            <Link to="/servicios" className="souvenir-mini__cta">Conoce nuestros paquetes →</Link>
+            <div className="souvenir-section__content">
+              <h3 className="souvenir-section__name">Bodas</h3>
+              <p className="souvenir-section__desc">
+                Suculentas elegantes como recuerdo para tus invitados. Personalizadas con etiquetas, macetas decorativas y empaque artesanal.
+              </p>
+              <p className="souvenir-section__price">Desde RD$ 250/unidad</p>
+              <p className="souvenir-section__min">Mínimo 20 unidades</p>
+            </div>
+          </div>
+
+          <div className="souvenir-section souvenir-section--reverse">
+            <div className="souvenir-section__img-wrap">
+              <img src={souvenirCollection} alt="Souvenirs para Cumpleaños" className="souvenir-section__img" />
+            </div>
+            <div className="souvenir-section__content">
+              <h3 className="souvenir-section__name">Cumpleaños</h3>
+              <p className="souvenir-section__desc">
+                Mini suculentas perfectas como souvenirs de cumpleaños. Variedad de especies y presentaciones para cualquier temática.
+              </p>
+              <p className="souvenir-section__price">Desde RD$ 200/unidad</p>
+              <p className="souvenir-section__min">Mínimo 10 unidades</p>
+            </div>
+          </div>
+
+          <div className="souvenir-section">
+            <div className="souvenir-section__img-wrap">
+              <img src={servicesPotted} alt="Souvenirs Corporativos" className="souvenir-section__img" />
+            </div>
+            <div className="souvenir-section__content">
+              <h3 className="souvenir-section__name">Corporativo</h3>
+              <p className="souvenir-section__desc">
+                Suculentas premium para eventos empresariales, conferencias y regalos corporativos. Presentación ejecutiva con branding personalizado.
+              </p>
+              <p className="souvenir-section__price">Desde RD$ 350/unidad</p>
+              <p className="souvenir-section__min">Mínimo 15 unidades</p>
+            </div>
+          </div>
+
+          <div className="souvenir-mini__inner">
+            <Link to="/servicios" className="souvenir-mini__cta">Ver todos los paquetes →</Link>
           </div>
         </section>
 

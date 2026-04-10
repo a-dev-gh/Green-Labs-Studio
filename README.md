@@ -2,7 +2,7 @@
 
 Succulent store website for **GREENLABS Botanics** — Santiago de los Caballeros, Dominican Republic.
 
-Built for O. E. Orders are fulfilled via WhatsApp. The site includes a full product catalog, event souvenir service, authenticated customer accounts, and a CMS admin dashboard for Oscar to manage all content.
+Built for O. E. Orders are fulfilled via WhatsApp. The site includes a full product catalog, event souvenir service, authenticated customer accounts, a blog, and a CMS admin dashboard for Oscar to manage all content.
 
 ---
 
@@ -14,12 +14,19 @@ Built for O. E. Orders are fulfilled via WhatsApp. The site includes a full prod
 
 ---
 
+## Live
+
+[greenlabsstudio.adraa19al.workers.dev](https://greenlabsstudio.adraa19al.workers.dev)
+
+---
+
 ## Features
 
 - **Product Catalog** — Filterable succulent grid with category pills, search, sorting, and individual product detail pages with care guides
 - **WhatsApp Ordering** — Cart checkout generates a formatted WhatsApp message sent directly to the store
 - **Souvenir Service** — Dedicated page for event souvenir packages (weddings, birthdays, corporate) with WhatsApp inquiry CTA
 - **User Accounts** — Authenticated customers can manage their cart, saved wishlists, and view order history
+- **Blog** — Editorial posts covering succulent care, event inspiration, and store news
 - **Admin CMS Dashboard** — Oscar manages products, categories, services, proposals, testimonials, and landing page content — no code required
 - **Scrollytelling Leaf Animation** — Animated floating leaves on the landing hero transition to white when entering the dark testimonials section
 
@@ -70,9 +77,25 @@ npm run build
 |---|---|---|
 | `VITE_SUPABASE_URL` | Your Supabase project URL | Yes |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon/public API key | Yes |
-| `VITE_WHATSAPP_NUMBER` | WhatsApp number for orders (e.g. `18091234567`) | Yes |
+| `VITE_WHATSAPP_NUMBER` | WhatsApp number for orders (e.g. `18495252430`) | Yes |
 
 All three variables are required for the app to function. None of these values are committed to the repository.
+
+---
+
+## Deployment
+
+The site is deployed to **Cloudflare Workers** via Cloudflare Pages.
+
+Live URL: `greenlabsstudio.adraa19al.workers.dev`
+
+To deploy your own instance:
+
+1. Run `npm run build` to generate the `dist/` folder.
+2. Push to the connected GitHub repository.
+3. Cloudflare Pages will detect the push and redeploy automatically.
+
+Environment variables must be set in the Cloudflare Pages dashboard under **Settings > Environment Variables** — do not commit them to the repository.
 
 ---
 

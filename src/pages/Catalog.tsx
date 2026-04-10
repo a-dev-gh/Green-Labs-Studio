@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import imgHercules from '../../assets/IMG_6745.JPG.webp';
-import imgPerle from '../../assets/IMG_6739.JPG.webp';
-import imgOrgyalis from '../../assets/IMG_6743.JPG.webp';
-import imgTomentosa from '../../assets/IMG_6744.JPG.webp';
+import imgHercules from '../../assets/echeveria-hercules.webp';
+import imgPerle from '../../assets/echeveria-perle.webp';
+import imgOrgyalis from '../../assets/kalanchoe-orgyalis.webp';
+import imgTomentosa from '../../assets/kalanchoe-tomentosa.webp';
 import '../styles/pages/catalog.css';
 import '../styles/pages/landing.css';
 

@@ -5,8 +5,8 @@ export default function Footer() {
   return (
     <footer className="footer">
       <div className="footer__brand">
-        <div className="footer__logo">G</div>
-        <span className="footer__name">GREENLABS BOTANICS</span>
+        <img src="/logo-icon.webp" alt="GREENLABS" className="footer__logo-img" />
+        <span className="footer__name">GREENLABS</span>
       </div>
       <p className="footer__location">Santiago de los Caballeros, República Dominicana</p>
       <div className="footer__links">

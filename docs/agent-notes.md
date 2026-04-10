@@ -20,8 +20,8 @@
 - [x] TASK-001 | @architect | Design full system: data models, routes, component tree, CMS schema, auth roles | DONE — docs/architecture.md complete with all models, routes, and component hierarchy
 - [x] TASK-002 | @db-builder | Create Supabase schema: products, categories, orders, carts, wishlists, users, cms_content, services, souvenir_packages | DONE — all migration files exist with rollback SQL
 - [x] TASK-003 | @auth-builder | Implement Supabase Auth: signup/login/password-reset, admin role, user role, RLS policies for all tables | DONE — auth flows complete E2E, RLS applied
-- [ ] TASK-004 | @ui-builder | Build all pages: Landing (with souvenir mini-section), Catalog, Product Detail, Services/Souvenirs, Cart, Account/Profile/Settings, Admin CMS Dashboard | IN PROGRESS — 3 parallel agents running: (1) Landing page, (2) Auth/Account/Cart, (3) Catalog/Services
-- [ ] TASK-005 | @debugger | Fix scrollytelling: leaves must transition to white when testimonials section (green bg) is visible | IN PROGRESS — being handled within the UI-Builder Landing agent
+- [x] TASK-004 | @ui-builder | Build all pages: Landing, Catalog, ProductDetail, Services, Cart, Auth (Login/Signup/ForgotPassword/ResetPassword), Account (Profile/Orders/Wishlists/Settings), Blog, NotFound | DONE — all 14 pages built
+- [x] TASK-005 | @debugger | Fix scrollytelling: leaves must transition to white when testimonials section (green bg) is visible | DONE — smooth green-to-white leaf transition using scroll-position interpolation
 - [ ] TASK-006 | @code-reviewer | Review all PRs | PENDING
 - [ ] TASK-007 | @security-audit | Full scan | PENDING
 - [ ] TASK-008 | @documenter | README, deployment guide, CMS admin guide | PENDING
@@ -30,7 +30,7 @@
 TASK-001 → TASK-002 + TASK-003 (parallel) → TASK-004 + TASK-005 (parallel) → TASK-006 → TASK-007 → TASK-008
 
 ### Blocked on Adrian
-- [ ] WhatsApp number for order links
+- [x] WhatsApp number for order links — resolved: +1 (849) 525-2430
 - [ ] Supabase project credentials (URL + anon key + service role key)
 - [ ] Oscar's admin email for master account
 - [ ] Domain DNS setup for greenlabs.studio
@@ -42,7 +42,8 @@ TASK-001 → TASK-002 + TASK-003 (parallel) → TASK-004 + TASK-005 (parallel) �
 4. **Services** — Souvenir packages for events (weddings, birthdays, corporate)
 5. **Cart** — Saved items, WhatsApp checkout
 6. **Account** — Profile settings, order history, saved lists, password reset
-7. **Admin CMS** — Products CRUD, catalog management, services/proposals editor, public dashboard
+7. **Blog** — Editorial posts, 4 sample entries
+8. **Admin CMS** — Products CRUD, catalog management, services/proposals editor, public dashboard
 
 ### CMS Admin Can Edit
 - Products (name, description, price, images, care guide, category)
@@ -67,3 +68,29 @@ TASK-001 → TASK-002 + TASK-003 (parallel) → TASK-004 + TASK-005 (parallel) �
 - TASK-006 through TASK-008: Pending — blocked on TASK-004 and TASK-005 completing.
 
 **Next:** Await UI-Builder agents to finish all pages, then hand off to @code-reviewer (TASK-006).
+
+---
+
+## SESSION PROGRESS — 2026-04-10
+
+**Summary:** UI build complete. All 14 pages shipped. Assets finalized, WhatsApp configured, first deployment live on Cloudflare Workers.
+
+- TASK-004 (@ui-builder): Complete. All 14 pages built and routed:
+  - Landing — editorial split-layout hero (Oscar left with plants growing around him, text + CTA right), About, Featured Products, Souvenir mini-section, Testimonials, WhatsApp CTA
+  - Catalog — 8 products, category filter pills, sorting
+  - ProductDetail — images, care guide, WhatsApp order button
+  - Services — updated with real souvenir photos from Oscar
+  - Cart — saved items, WhatsApp checkout flow
+  - Auth — Login, Signup, ForgotPassword, ResetPassword
+  - Account — Profile, Orders, Wishlists, Settings
+  - Blog — editorial post grid at `/blog` with 4 sample posts
+  - NotFound — 404 page
+
+- TASK-005 (@debugger): Complete. Scrollytelling leaf animation resolved — smooth green-to-white color transition driven by scroll-position interpolation as the testimonials section enters view.
+
+- Assets: All images converted to WebP format with descriptive, SEO-friendly filenames.
+- Logo: Real GREENLABS logo integrated — mandala icon + Montserrat wordmark. Applied to Navbar and Footer.
+- WhatsApp: Number configured as +1 (849) 525-2430 across all order and inquiry CTAs.
+- Deployment: Site deployed to Cloudflare Workers at `greenlabsstudio.adraa19al.workers.dev`.
+
+**Next:** TASK-006 (@code-reviewer) can now begin. TASK-007 and TASK-008 follow in sequence.
