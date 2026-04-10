@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import servicesPotted from '../../assets/services-potted.webp';
 import souvenirGift from '../../assets/souvenir-gift-wrap.webp';
 import souvenirCollection from '../../assets/souvenir-collection.webp';

@@ -24,11 +24,6 @@ const testimonials = [
   { text: 'La mejor tienda de suculentas en Santiago.', name: 'Ana P.' },
 ];
 
-const souvenirPackages = [
-  { icon: '💍', name: 'Boda', price: 'RD$ 250/u', detail: 'Mínimo 20 unidades' },
-  { icon: '🎂', name: 'Cumpleaños', price: 'RD$ 200/u', detail: 'Mínimo 10 unidades' },
-  { icon: '🏢', name: 'Corporativo', price: 'RD$ 350/u', detail: 'Mínimo 15 unidades' },
-];
 
 function CanvasBackground({ scrollProgress, darkBlend }: { scrollProgress: number; darkBlend: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
