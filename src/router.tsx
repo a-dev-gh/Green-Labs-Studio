@@ -19,6 +19,7 @@ const Wishlists = lazy(() => import('./pages/Wishlists'));
 const Settings = lazy(() => import('./pages/Settings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Blog = lazy(() => import('./pages/Blog'));
+const Policies = lazy(() => import('./pages/Policies'));
 
 const AccountLayout = lazy(() => import('./components/layout/AccountLayout'));
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
@@ -51,6 +52,7 @@ export function AppRouter() {
           <Route path="catalogo/:slug" element={<ProductDetail />} />
           <Route path="servicios" element={<Services />} />
           <Route path="blog" element={<Blog />} />
+          <Route path="politicas/:type" element={<Policies />} />
           <Route path="auth/login" element={<Login />} />
           <Route path="auth/registro" element={<Signup />} />
           <Route path="auth/recuperar" element={<ForgotPassword />} />

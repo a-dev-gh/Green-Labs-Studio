@@ -124,6 +124,8 @@ export interface Testimonial {
   avatar_url: string | null;
   is_featured: boolean;
   sort_order: number;
+  status: 'pending' | 'approved' | 'rejected';
+  user_id: string | null;
   created_at: string;
   updated_at: string;
 }

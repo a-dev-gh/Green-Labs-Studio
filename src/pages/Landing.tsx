@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import SucculentQuiz from '../components/landing/SucculentQuiz';
+import TestimonialForm from '../components/landing/TestimonialForm';
+import { useAuth } from '../core/auth/useAuth';
 import heroImg from '../../assets/hero-oscar.webp';
 import aboutImg from '../../assets/about-oscar.webp';
 import imgHercules from '../../assets/echeveria-hercules.webp';
@@ -131,10 +134,11 @@ function CanvasBackground({ scrollProgress, darkBlend }: { scrollProgress: numbe
 }
 
 export default function Landing() {
+  const { user } = useAuth();
   const [scrollProg, setScrollProg] = useState(0);
   const [darkBlend, setDarkBlend] = useState(0);
-  const [heroSlide, setHeroSlide] = useState(0);
-  const [tSlide, setTSlide] = useState(0);
+  const [quizOpen, setQuizOpen] = useState(false);
+  const [testimonialFormOpen, setTestimonialFormOpen] = useState(false);
   const testiRef = useRef<HTMLElement>(null);
 
   const handleScroll = useCallback(() => {
@@ -160,20 +164,25 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // Plants grow in one at a time, accumulating. After all 4 are visible, reset and start over.
-  useEffect(() => {
-    const t = setInterval(() => {
-      setHeroSlide(s => {
-        if (s >= products.length - 1) return -1; // reset: all hidden, then first grows next tick
-        return s + 1;
-      });
-    }, 2500);
-    return () => clearInterval(t);
-  }, []);
 
+  // Scroll reveal observer for services slide-in + general reveals
   useEffect(() => {
-    const t = setInterval(() => setTSlide(s => (s + 1) % testimonials.length), 4500);
-    return () => clearInterval(t);
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) {
+          const dir = (e.target as HTMLElement).dataset.reveal;
+          if (dir === 'left') e.target.classList.add('reveal--left', 'is-visible');
+          else if (dir === 'right') e.target.classList.add('reveal--right', 'is-visible');
+          else e.target.classList.add('is-visible');
+          observer.unobserve(e.target);
+        }
+      }),
+      { threshold: 0.08 }
+    );
+    const t = setTimeout(() => {
+      document.querySelectorAll('[data-reveal], .reveal').forEach(el => observer.observe(el));
+    }, 200);
+    return () => { clearTimeout(t); observer.disconnect(); };
   }, []);
 
   return (
@@ -183,30 +192,81 @@ export default function Landing() {
       <div style={{ position: 'relative', zIndex: 1 }}>
         {/* Hero */}
         <section className="hero">
-          {/* Left: Oscar + plants growing around him */}
+          {/* Left: Oscar */}
           <div className="hero__visual">
             <div className="hero__oscar-wrap">
               <img src={heroImg} alt="Oscar - GREENLABS" className="hero__oscar" />
             </div>
-            {products.map((p, i) => (
-              <img
-                key={i}
-                src={p.img}
-                alt={p.name}
-                className={`hero__plant hero__plant--pos${i} ${heroSlide >= i ? 'hero__plant--visible' : ''}`}
-              />
-            ))}
           </div>
 
-          {/* Right: text + CTA */}
+          {/* Right: text + quiz pill */}
           <div className="hero__info">
             <p className="hero__eyebrow">Greenlabs Botanics</p>
             <h1 className="hero__title">Tu próxima<br />suculenta</h1>
             <h1 className="hero__title hero__title--accent">te espera</h1>
             <p className="hero__subtitle">
-              Suculentas seleccionadas con amor en Santiago de los Caballeros. Encuentra la suculenta perfecta para tu espacio.
+              Suculentas seleccionadas con amor en Santiago de los Caballeros.
             </p>
-            <Link to="/catalogo" className="hero__cta">Descubre tu suculenta →</Link>
+
+            <div className="hero__badges">
+              <div className="hero__badge">
+                <span className="hero__badge-number">200+</span>
+                <span className="hero__badge-label">Suculentas</span>
+              </div>
+              <div className="hero__badge">
+                <span className="hero__badge-number">15</span>
+                <span className="hero__badge-label">Variedades</span>
+              </div>
+              <div className="hero__badge">
+                <span className="hero__badge-number">50+</span>
+                <span className="hero__badge-label">Clientes felices</span>
+              </div>
+            </div>
+
+            <button className="hero__cta" onClick={() => setQuizOpen(true)}>
+              <span className="hero__cta-lead">¿Te gustaría encontrar tu suculenta ideal?</span>
+              <span className="hero__cta-action">Toma este pequeño cuestionario →</span>
+            </button>
+          </div>
+        </section>
+
+        {/* How It Works */}
+        <section className="how-it-works">
+          <div className="how-it-works__inner">
+            <p className="how-it-works__eyebrow">Cómo funciona</p>
+            <h2 className="how-it-works__title">3 pasos para tu <span className="how-it-works__title-accent">suculenta</span></h2>
+            <div className="how-it-works__grid">
+              <div className="how-it-works__step reveal reveal--delay-1">
+                <div className="how-it-works__icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
+                    <path d="M11 8v6M8 11h6" />
+                  </svg>
+                </div>
+                <h3 className="how-it-works__step-title">Elige</h3>
+                <p className="how-it-works__step-desc">Explora nuestro catálogo o toma el cuestionario para encontrar tu suculenta ideal.</p>
+              </div>
+              <div className="how-it-works__step reveal reveal--delay-2">
+                <div className="how-it-works__icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
+                  </svg>
+                </div>
+                <h3 className="how-it-works__step-title">Pide</h3>
+                <p className="how-it-works__step-desc">Escríbenos por WhatsApp y coordinamos tu pedido con empaque personalizado.</p>
+              </div>
+              <div className="how-it-works__step reveal reveal--delay-3">
+                <div className="how-it-works__icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22V12M12 12C12 12 7 10 4 6c5 0 8 2 8 6z" />
+                    <path d="M12 12C12 12 17 10 20 6c-5 0-8 2-8 6z" />
+                  </svg>
+                </div>
+                <h3 className="how-it-works__step-title">Disfruta</h3>
+                <p className="how-it-works__step-desc">Recibe tu suculenta con guía de cuidado incluida. ¡Lista para transformar tu espacio!</p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -234,7 +294,7 @@ export default function Landing() {
                   ))}
                 </div>
               </div>
-              <img src={aboutImg} alt="Oscar - GREENLABS" className="about__photo" />
+              <img src={aboutImg} alt="Oscar - GREENLABS" className="about__photo float" />
             </div>
           </div>
         </section>
@@ -249,7 +309,7 @@ export default function Landing() {
             <p className="featured__desc">Seleccionadas a mano con guía de cuidado incluida.</p>
             <div className="featured__grid">
               {products.map((p, i) => (
-                <div key={i} className="product-card">
+                <div key={i} className="product-card tilt-card">
                   <div className="product-card__image-wrap">
                     <img src={p.img} alt={p.name} className="product-card__image" />
                   </div>
@@ -276,7 +336,7 @@ export default function Landing() {
             </h2>
           </div>
 
-          <div className="souvenir-section">
+          <div className="souvenir-section" data-reveal="left">
             <div className="souvenir-section__img-wrap">
               <img src={souvenirGift} alt="Souvenirs para Bodas" className="souvenir-section__img" />
             </div>
@@ -290,7 +350,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="souvenir-section souvenir-section--reverse">
+          <div className="souvenir-section souvenir-section--reverse" data-reveal="right">
             <div className="souvenir-section__img-wrap">
               <img src={souvenirCollection} alt="Souvenirs para Cumpleaños" className="souvenir-section__img" />
             </div>
@@ -304,7 +364,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="souvenir-section">
+          <div className="souvenir-section" data-reveal="left">
             <div className="souvenir-section__img-wrap">
               <img src={servicesPotted} alt="Souvenirs Corporativos" className="souvenir-section__img" />
             </div>
@@ -330,20 +390,21 @@ export default function Landing() {
             <h2 className="testimonials__title">
               Lo que dicen nuestros <span className="testimonials__title-accent">clientes</span>
             </h2>
-            <div className="testimonials__slider">
+            <div className="testimonials__cards">
               {testimonials.map((t, i) => (
-                <div key={i} className={`testimonials__slide ${i === tSlide ? 'testimonials__slide--active' : ''}`}>
-                  <p className="testimonials__quote">"{t.text}"</p>
-                  <p className="testimonials__author">{t.name}</p>
+                <div key={i} className="testimonials__card">
+                  <div className="testimonials__card-stars">{'★'.repeat(5)}</div>
+                  <p className="testimonials__card-quote">"{t.text}"</p>
+                  <p className="testimonials__card-author">{t.name}</p>
                 </div>
               ))}
             </div>
-            <div className="testimonials__dots">
-              {testimonials.map((_, i) => (
-                <button key={i} onClick={() => setTSlide(i)}
-                  className={`testimonials__dot ${i === tSlide ? 'testimonials__dot--active' : ''}`} />
-              ))}
-            </div>
+            <button
+              className="testimonials__share-btn"
+              onClick={() => user ? setTestimonialFormOpen(true) : window.location.assign('/auth/login')}
+            >
+              Comparte tu experiencia
+            </button>
           </div>
         </section>
 
@@ -353,9 +414,20 @@ export default function Landing() {
             ¿Lista para tu primera <span className="wa-cta__title-accent">suculenta</span>?
           </h2>
           <p className="wa-cta__subtitle">Escríbenos y te ayudamos a elegir.</p>
-          <a href="#" className="wa-cta__btn">Escríbenos por WhatsApp</a>
+          <a href={`https://wa.me/18495252430?text=${encodeURIComponent('Hola! Me interesan las suculentas de GREENLABS')}`} target="_blank" rel="noopener noreferrer" className="wa-cta__btn">Escríbenos por WhatsApp</a>
         </section>
       </div>
+
+      {quizOpen && <SucculentQuiz onClose={() => setQuizOpen(false)} />}
+      {testimonialFormOpen && (
+        <TestimonialForm
+          onClose={() => setTestimonialFormOpen(false)}
+          onSubmit={(data) => {
+            // TODO: Insert into Supabase when credentials are available
+            console.log('Testimonial submitted:', data);
+          }}
+        />
+      )}
     </div>
   );
 }
