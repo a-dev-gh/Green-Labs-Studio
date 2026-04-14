@@ -52,15 +52,55 @@
 }
 
 .navbar__link {
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-bold);
   color: var(--color-forest);
   text-decoration: none;
+  position: relative;
+  padding-bottom: 3px;
   transition: color var(--transition-fast);
+}
+
+/* Underline on hover */
+.navbar__link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-olive);
+  border-radius: 1px;
+  transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.navbar__link:hover::after {
+  width: 100%;
 }
 
 .navbar__link:hover {
   color: var(--color-olive);
+}
+
+/* Liquid divider */
+.navbar__divider {
+  width: 1px;
+  height: 18px;
+  background: linear-gradient(to bottom, transparent, rgba(27, 67, 50, 0.2), transparent);
+  flex-shrink: 0;
+}
+
+.navbar__link-icon {
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.navbar__link:hover .navbar__link-icon {
+  opacity: 1;
 }
 
 .navbar__actions {
