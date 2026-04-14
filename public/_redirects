@@ -1,9 +1,1 @@
-# Force HTTPS
-http://greenlabs.studio/* https://greenlabs.studio/:splat 301
-http://www.greenlabs.studio/* https://greenlabs.studio/:splat 301
-
-# Admin subdomain redirect
-https://admin.greenlabs.studio/* https://greenlabs.studio/admin/:splat 301
-
-# SPA fallback — all routes serve index.html for client-side routing
 /* /index.html 200
