@@ -1,0 +1,87 @@
+/* ── Quiz Page Layout ── */
+/* This file handles the page-level wrapper around the quiz component.
+   The quiz internals are styled in src/styles/components/quiz.css */
+
+.quiz-page {
+  min-height: 100vh;
+  background: var(--color-sand);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header band ── */
+.quiz-page__header {
+  background: var(--color-forest);
+  padding: calc(var(--navbar-height) + var(--space-8)) var(--container-pad) var(--space-10);
+  text-align: center;
+}
+
+.quiz-page__eyebrow {
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--color-olive);
+  margin-bottom: var(--space-3);
+}
+
+.quiz-page__title {
+  font-family: var(--font-editorial);
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-sand);
+  line-height: 1.15;
+  margin-bottom: var(--space-4);
+}
+
+.quiz-page__intro {
+  font-size: var(--text-sm);
+  color: rgba(245, 240, 232, 0.72);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.75;
+}
+
+/* ── Body: quiz card centred ── */
+.quiz-page__body {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-12) var(--container-pad) var(--space-16);
+}
+
+/* ── Page-mode quiz overrides ── */
+.quiz--page {
+  max-width: 520px;
+  width: 100%;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);
+  box-shadow: 0 8px 40px rgba(27, 67, 50, 0.08);
+  border: 1px solid rgba(232, 224, 212, 0.6);
+}
+
+/* ── Footer link ── */
+.quiz-page__footer {
+  background: var(--color-sand-dark);
+  padding: var(--space-6) var(--container-pad);
+  text-align: center;
+  border-top: 1px solid rgba(27, 67, 50, 0.08);
+}
+
+.quiz-page__footer-text {
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+}
+
+.quiz-page__footer-link {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-forest);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.quiz-page__footer-link:hover {
+  color: var(--color-olive);
+}

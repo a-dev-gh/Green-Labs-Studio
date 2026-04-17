@@ -63,7 +63,8 @@ export interface OrderItem {
 
 export interface CartItem {
   id: string;
-  user_id: string;
+  user_id: string | null;
+  session_id: string | null;
   product_id: string;
   quantity: number;
   created_at: string;

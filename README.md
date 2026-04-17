@@ -23,9 +23,11 @@ Built for O. E. Orders are fulfilled via WhatsApp. The site includes a full prod
 ## Features
 
 - **Product Catalog** — Filterable succulent grid with category pills, search, sorting, and individual product detail pages with care guides
-- **WhatsApp Ordering** — Cart checkout generates a formatted WhatsApp message sent directly to the store
+- **Succulent Quiz** — Interactive quiz at `/cuestionario` to help visitors find the right succulent for their space
+- **Guest WhatsApp Checkout** — Any visitor can add items to a cart and check out via WhatsApp without creating an account; cart merges automatically on login
 - **Souvenir Service** — Dedicated page for event souvenir packages (weddings, birthdays, corporate) with WhatsApp inquiry CTA
 - **User Accounts** — Authenticated customers can manage their cart, saved wishlists, and view order history
+- **About Page** — Brand story and team at `/nosotros`
 - **Blog** — Editorial posts covering succulent care, event inspiration, and store news
 - **Admin CMS Dashboard** — Oscar manages products, categories, services, proposals, testimonials, and landing page content — no code required
 - **Scrollytelling Leaf Animation** — Animated floating leaves on the landing hero transition to white when entering the dark testimonials section
@@ -106,7 +108,7 @@ src/
 ├── components/
 │   ├── layout/         # PublicLayout, AdminLayout, Navbar, Footer, BottomNav
 │   ├── auth/           # ProtectedRoute, AdminRoute, Login/Signup/Reset forms
-│   ├── landing/        # Hero, LeafAnimation, FeaturedProducts, Testimonials, CTAs
+│   ├── landing/        # HeroCarousel, LeafAnimation, FeaturedProducts, Testimonials, CTAs
 │   ├── catalog/        # ProductGrid, ProductCard, ProductFilters, CategoryPills
 │   ├── product/        # ProductImages, ProductInfo, CareGuide, AddToCart, RelatedProducts
 │   ├── services/       # ServiceCard, SouvenirPackageCard, ServiceWhatsAppCTA
@@ -117,7 +119,7 @@ src/
 ├── pages/              # Route-level page components
 ├── core/
 │   ├── auth/           # AuthProvider, useAuth, authService
-│   ├── cart/           # CartProvider, useCart
+│   ├── cart/           # CartProvider, useCart, sessionId.ts (guest cart)
 │   ├── wishlist/       # WishlistProvider, useWishlist
 │   └── supabase.ts     # Supabase client instance
 ├── hooks/              # useProducts, useCategories, useScrollAnimation, useDebounce, etc.
@@ -168,7 +170,7 @@ src/
 | `products` | Succulents with pricing, images, care guide, stock, and category |
 | `orders` | Customer orders with status tracking and WhatsApp flag |
 | `order_items` | Line items per order with price snapshot |
-| `cart_items` | Persistent cart, one row per user/product pair |
+| `cart_items` | Persistent cart for both guests (via `session_id`) and authenticated users (via `user_id`) |
 | `wishlists` | Named wishlists per user |
 | `wishlist_items` | Products saved to a wishlist |
 | `services` | Service offerings (e.g. event arrangements) |
@@ -178,6 +180,8 @@ src/
 | `proposals` | Curated featured collections with product arrays |
 
 Auth uses Supabase email/password. Two roles: `admin` (Oscar — full CMS access) and `user` (customers — cart, wishlists, orders). Role is stored in `profiles.role`.
+
+Guest cart rows use `session_id` (UUID v4 from `localStorage`) instead of `user_id`. All guest access goes through `SECURITY DEFINER` RPCs (`guest_cart_*`). On login, `merge_guest_cart(p_session_id)` moves guest items into the authenticated cart automatically.
 
 ---
 

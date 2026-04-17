@@ -50,6 +50,14 @@ export default function Navbar() {
           Servicios
         </Link>
         <span className="navbar__divider" />
+        <Link to="/nosotros" className="navbar__link">
+          <svg className="navbar__link-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M5 20c0-4 3.5-7 7-7s7 3 7 7" />
+          </svg>
+          Nosotros
+        </Link>
+        <span className="navbar__divider" />
         <Link to="/blog" className="navbar__link">
           <svg className="navbar__link-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 20h9" />

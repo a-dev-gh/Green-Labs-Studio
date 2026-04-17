@@ -87,13 +87,15 @@ function getRecommendations(scores: Record<string, number>): Recommendation[] {
 }
 
 interface Props {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export default function SucculentQuiz({ onClose }: Props) {
   const [step, setStep] = useState(0);
   const [scores, setScores] = useState<Record<string, number>>({});
   const [results, setResults] = useState<Recommendation[] | null>(null);
+
+  const isPageMode = !onClose;
 
   const handleSelect = (optionScores: Record<string, number>) => {
     const updated = { ...scores };
@@ -119,68 +121,78 @@ export default function SucculentQuiz({ onClose }: Props) {
     setResults(null);
   };
 
-  return (
-    <div className="quiz-overlay" onClick={onClose}>
-      <div className="quiz" onClick={e => e.stopPropagation()}>
+  const quizContent = (
+    <div className={`quiz${isPageMode ? ' quiz--page' : ''}`} onClick={e => e.stopPropagation()}>
+      {!isPageMode && onClose && (
         <button className="quiz__close" onClick={onClose} aria-label="Cerrar">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
+      )}
 
-        {!results ? (
-          <>
-            {/* Progress */}
-            <div className="quiz__progress">
-              {questions.map((_, i) => (
-                <div key={i} className={`quiz__progress-dot ${i <= step ? 'quiz__progress-dot--active' : ''}`} />
-              ))}
-            </div>
+      {!results ? (
+        <>
+          {/* Progress */}
+          <div className="quiz__progress">
+            {questions.map((_, i) => (
+              <div key={i} className={`quiz__progress-dot ${i <= step ? 'quiz__progress-dot--active' : ''}`} />
+            ))}
+          </div>
 
-            <p className="quiz__subtitle">{questions[step].subtitle}</p>
-            <h3 className="quiz__question">{questions[step].title}</h3>
+          <p className="quiz__subtitle">{questions[step].subtitle}</p>
+          <h3 className="quiz__question">{questions[step].title}</h3>
 
-            <div className="quiz__options">
-              {questions[step].options.map((opt, i) => (
-                <button key={i} className="quiz__option" onClick={() => handleSelect(opt.scores)}>
-                  <span className="quiz__option-icon">{opt.icon}</span>
-                  <span className="quiz__option-label">{opt.label}</span>
-                </button>
-              ))}
-            </div>
+          <div className="quiz__options">
+            {questions[step].options.map((opt, i) => (
+              <button key={i} className="quiz__option" onClick={() => handleSelect(opt.scores)}>
+                <span className="quiz__option-icon">{opt.icon}</span>
+                <span className="quiz__option-label">{opt.label}</span>
+              </button>
+            ))}
+          </div>
 
-            {step > 0 && (
-              <button className="quiz__back" onClick={handleBack}>← Anterior</button>
-            )}
-          </>
-        ) : (
-          <>
-            <h3 className="quiz__results-title">Tu suculenta ideal</h3>
-            <p className="quiz__results-subtitle">Basado en tus respuestas, te recomendamos:</p>
+          {step > 0 && (
+            <button className="quiz__back" onClick={handleBack}>← Anterior</button>
+          )}
+        </>
+      ) : (
+        <>
+          <h3 className="quiz__results-title">Tu suculenta ideal</h3>
+          <p className="quiz__results-subtitle">Basado en tus respuestas, te recomendamos:</p>
 
-            <div className="quiz__results">
-              {results.map((rec, i) => (
-                <div key={i} className="quiz__result-card">
-                  <img src={rec.img} alt={rec.name} className="quiz__result-img" />
-                  <div className="quiz__result-info">
-                    <h4 className="quiz__result-name">{rec.name}</h4>
-                    <p className="quiz__result-scientific">{rec.scientific}</p>
-                    <p className="quiz__result-reason">{rec.reason}</p>
-                    <Link to={`/catalogo/${rec.slug}`} className="quiz__result-link" onClick={onClose}>
-                      Ver detalles →
-                    </Link>
-                  </div>
+          <div className="quiz__results">
+            {results.map((rec, i) => (
+              <div key={i} className="quiz__result-card">
+                <img src={rec.img} alt={rec.name} className="quiz__result-img" />
+                <div className="quiz__result-info">
+                  <h4 className="quiz__result-name">{rec.name}</h4>
+                  <p className="quiz__result-scientific">{rec.scientific}</p>
+                  <p className="quiz__result-reason">{rec.reason}</p>
+                  <Link to={`/catalogo/${rec.slug}`} className="quiz__result-link" onClick={onClose}>
+                    Ver detalles →
+                  </Link>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
 
-            <div className="quiz__results-actions">
-              <button className="quiz__restart" onClick={handleRestart}>Intentar de nuevo</button>
-              <Link to="/catalogo" className="quiz__browse" onClick={onClose}>Ver todo el catálogo →</Link>
-            </div>
-          </>
-        )}
-      </div>
+          <div className="quiz__results-actions">
+            <button className="quiz__restart" onClick={handleRestart}>Intentar de nuevo</button>
+            <Link to="/catalogo" className="quiz__browse" onClick={onClose}>Ver todo el catálogo →</Link>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  if (isPageMode) {
+    return quizContent;
+  }
+
+  return (
+    <div className="quiz-overlay" onClick={onClose}>
+      {quizContent}
     </div>
   );
 }
