@@ -1,3 +1,5 @@
+import AdminSoon from './AdminSoon';
+
 export default function AdminOrders() {
-  return <div className="admin-page"><h1>AdminOrders</h1></div>;
+  return <AdminSoon title="Pedidos" description="Historial de pedidos y verificación de órdenes por número." />;
 }

@@ -1,3 +1,5 @@
+import AdminSoon from './AdminSoon';
+
 export default function AdminProposals() {
-  return <div className="admin-page"><h1>AdminProposals</h1></div>;
+  return <AdminSoon title="Propuestas" description="Gestión de propuestas personalizadas para eventos." />;
 }
