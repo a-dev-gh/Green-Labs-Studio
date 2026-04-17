@@ -5,7 +5,7 @@ import { useCart } from '../../core/cart/CartProvider';
 import '../../styles/components/navbar.css';
 
 export default function Navbar() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const { itemCount } = useCart();
   const [scrolled, setScrolled] = useState(false);
 
@@ -84,11 +84,7 @@ export default function Navbar() {
           </Link>
         )}
 
-        {isAdmin && (
-          <Link to="/admin" className="navbar__action-btn navbar__action-btn--admin" aria-label="Admin">
-            CMS
-          </Link>
-        )}
+        {/* CMS chip removed — admin portal lives on admin.greenlabs.studio */}
 
         <Link to="/carrito" className="navbar__cart-btn" aria-label="Carrito">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
