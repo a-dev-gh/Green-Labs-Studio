@@ -40,10 +40,11 @@ export default function AdminServices() {
 
   const fetchServices = useCallback(async () => {
     setIsLoading(true);
-    const { data } = await supabase
+    const { data, error: err } = await supabase
       .from('services')
       .select('*')
       .order('sort_order', { ascending: true });
+    if (err) setError(err.message);
     setServices((data as Service[]) || []);
     setIsLoading(false);
   }, []);
@@ -96,17 +97,20 @@ export default function AdminServices() {
   const confirmDelete = async () => {
     if (!deleteConfirm) return;
     setDeleting(true);
+    setError(null);
     if (deleteConfirm.images.length > 0) {
       await Promise.allSettled(deleteConfirm.images.map(url => deleteImage(url)));
     }
-    await supabase.from('services').delete().eq('id', deleteConfirm.id);
+    const { error: err } = await supabase.from('services').delete().eq('id', deleteConfirm.id);
     setDeleting(false);
+    if (err) { setError(`No se pudo eliminar: ${err.message}`); return; }
     setDeleteConfirm(null);
     fetchServices();
   };
 
   const handleToggleActive = async (service: Service) => {
-    await supabase.from('services').update({ is_active: !service.is_active }).eq('id', service.id);
+    const { error: err } = await supabase.from('services').update({ is_active: !service.is_active }).eq('id', service.id);
+    if (err) { setError(`No se pudo actualizar: ${err.message}`); return; }
     fetchServices();
   };
 

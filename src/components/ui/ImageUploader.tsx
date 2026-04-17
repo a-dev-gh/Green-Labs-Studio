@@ -62,9 +62,15 @@ export default function ImageUploader({
 
   const canAddMore = value.length + uploading.length < maxFiles;
 
+  /** Refs mirror the latest `value` + `uploading` so the closure below never sees stale state. */
+  const valueRef = useRef(value);
+  const uploadingRef = useRef(uploading);
+  useEffect(() => { valueRef.current = value; }, [value]);
+  useEffect(() => { uploadingRef.current = uploading; }, [uploading]);
+
   const processFiles = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files);
-    const available = maxFiles - value.length - uploading.length;
+    const available = maxFiles - valueRef.current.length - uploadingRef.current.length;
     const toProcess = fileArray.slice(0, Math.max(0, available));
 
     for (const file of toProcess) {
@@ -85,11 +91,17 @@ export default function ImageUploader({
 
       try {
         const blob = file.type === 'image/webp' ? file : await convertToWebp(file);
+        // Post-conversion size check — WEBP output can exceed the pre-conversion cap
+        // for large-canvas inputs.
+        if (blob.size > maxBytesPerFile) {
+          throw new Error(`Archivo convertido excede ${Math.round(maxBytesPerFile / 1024 / 1024)} MB`);
+        }
         const url = await uploadImage(folder, blob);
 
         clearInterval(timer);
         setUploading(prev => prev.filter(u => u.id !== id));
-        onChange([...value, url]);
+        // Read the most recent value via ref so sequential uploads don't overwrite each other.
+        onChange([...valueRef.current, url]);
       } catch (err) {
         clearInterval(timer);
         const msg = err instanceof Error ? err.message : 'Error';
@@ -100,7 +112,7 @@ export default function ImageUploader({
         setTimeout(() => setUploading(prev => prev.filter(u => u.id !== id)), 3000);
       }
     }
-  }, [folder, maxFiles, maxBytesPerFile, onChange, uploading.length, value]);
+  }, [folder, maxFiles, maxBytesPerFile, onChange]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
