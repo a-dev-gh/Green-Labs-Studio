@@ -8,14 +8,19 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3) var(--space-4);
-  background: transparent;
-  border-bottom: 1px solid transparent;
-  transition: all 0.35s ease;
+  /* Glass effect over the hero — light sand tint + backdrop blur so the bar
+     reads cleanly against both the sand text column and the image column. */
+  background: rgba(245, 240, 232, 0.4);
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  border-bottom: 1px solid rgba(232, 224, 212, 0.2);
+  transition: background 0.35s ease, backdrop-filter 0.35s ease, border-color 0.35s ease;
 }
 
 .navbar--scrolled {
   background: rgba(245, 240, 232, 0.94);
-  backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
   border-bottom-color: rgba(232, 224, 212, 0.5);
 }
 

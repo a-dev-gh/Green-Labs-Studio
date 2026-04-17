@@ -36,10 +36,18 @@ Built for O. E. Orders are fulfilled via WhatsApp. The site includes a full prod
 
 ## Getting Started
 
+### Setup (Supabase + env vars)
+
+If you are setting this up for the first time — creating the Supabase project, applying migrations, and creating the admin user — follow the step-by-step guide:
+
+**[docs/supabase-setup.md](docs/supabase-setup.md)**
+
+That guide covers: creating the project, copying credentials, configuring `.env.local`, running all 5 migrations via the SQL Editor, seeding test data, creating the admin account, and verifying the guest cart flow. No CLI tools required.
+
 ### Prerequisites
 
 - Node.js 18+
-- A Supabase project with the schema applied (see `supabase/migrations/`)
+- A Supabase project with the schema applied (see `docs/supabase-setup.md` for full instructions)
 
 ### Installation
 
