@@ -16,10 +16,17 @@ export default function About() {
           className="about-page__hero-img"
         />
         <div className="about-page__hero-overlay">
-          <p className="about-page__hero-eyebrow">Nosotros</p>
-          <h1 className="about-page__hero-title">
-            Una marca que <span>enseña</span> a cuidar
-          </h1>
+          <div className="about-page__hero-card">
+            <p className="about-page__hero-eyebrow">Nosotros</p>
+            <h1 className="about-page__hero-title">
+              Una marca que <span>enseña</span> a cuidar
+            </h1>
+            <p className="about-page__hero-intro">
+              Greenlabs Botanics nació en Santiago de los Caballeros de la pasión de Oscar Junior
+              Espinosa por las suculentas — y la convicción de que el conocimiento para cuidarlas
+              debe venir incluido.
+            </p>
+          </div>
         </div>
       </section>
 

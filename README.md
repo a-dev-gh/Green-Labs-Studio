@@ -22,10 +22,14 @@ Built for O. E. Orders are fulfilled via WhatsApp. The site includes a full prod
 
 ## Features
 
-- **Product Catalog** — Filterable succulent grid with category pills, search, sorting, and individual product detail pages with care guides
+- **Product Catalog** — Filterable succulent grid with category pills, sorting, and client-side fuzzy search (diacritic-insensitive, matched text highlighted)
+- **Product Modal with Photo Gallery** — Clicking any product card or sharing a `/catalogo/:slug` URL opens an overlay modal with a main image, thumbnail strip, and full-screen lightbox; browser back closes the modal cleanly
+- **SVG Care Badges** — Six custom inline SVG icons (three sun levels, three water levels) rendered as pills on every product card and with labels inside the modal
 - **Succulent Quiz** — Interactive quiz at `/cuestionario` to help visitors find the right succulent for their space
 - **Guest WhatsApp Checkout** — Any visitor can add items to a cart and check out via WhatsApp without creating an account; cart merges automatically on login
-- **Souvenir Service** — Dedicated page for event souvenir packages (weddings, birthdays, corporate) with WhatsApp inquiry CTA
+- **Souvenir Service** — Dedicated page for event souvenir packages (weddings, birthdays, corporate) with an alternating full-bleed editorial layout and WhatsApp inquiry CTA per service
+- **Services CMS** — Oscar adds, edits, reorders, and deletes services from `/admin/servicios` with drag-and-drop photo uploads; no code required
+- **Drag-and-Drop Photo Uploads** — Admin image uploader handles Supabase Storage uploads, per-file progress, preview thumbnails, delete, and reorder; stores the final URL array on the product or service row
 - **User Accounts** — Authenticated customers can manage their cart, saved wishlists, and view order history
 - **About Page** — Brand story and team at `/nosotros`
 - **Blog** — Editorial posts covering succulent care, event inspiration, and store news
@@ -42,7 +46,7 @@ If you are setting this up for the first time — creating the Supabase project,
 
 **[docs/supabase-setup.md](docs/supabase-setup.md)**
 
-That guide covers: creating the project, copying credentials, configuring `.env.local`, running all 5 migrations via the SQL Editor, seeding test data, creating the admin account, and verifying the guest cart flow. No CLI tools required.
+That guide covers: creating the project, copying credentials, configuring `.env.local`, running all 7 migrations via the SQL Editor, uploading photos via the admin UI, creating the admin account, and verifying the guest cart flow. No CLI tools required.
 
 ### Prerequisites
 
@@ -117,21 +121,23 @@ src/
 │   ├── layout/         # PublicLayout, AdminLayout, Navbar, Footer, BottomNav
 │   ├── auth/           # ProtectedRoute, AdminRoute, Login/Signup/Reset forms
 │   ├── landing/        # HeroCarousel, LeafAnimation, FeaturedProducts, Testimonials, CTAs
-│   ├── catalog/        # ProductGrid, ProductCard, ProductFilters, CategoryPills
+│   ├── catalog/        # ProductGrid, ProductCard, ProductModal, ProductGallery, CareBadges, SearchBox, ProductFilters, CategoryPills
 │   ├── product/        # ProductImages, ProductInfo, CareGuide, AddToCart, RelatedProducts
 │   ├── services/       # ServiceCard, SouvenirPackageCard, ServiceWhatsAppCTA
 │   ├── cart/           # CartItemList, CartSummary, WhatsAppCheckout
 │   ├── account/        # ProfileForm, OrderHistory, WishlistList, SettingsForm
-│   ├── admin/          # Full CMS: DataTable, AdminFormModal, ImageUploader, RichTextEditor
-│   └── ui/             # Button, Input, Modal, Drawer, Toast, Spinner, Skeleton, Badge, etc.
+│   ├── admin/          # Full CMS: DataTable, AdminFormModal, ImageUploader, RichTextEditor, AdminProducts, AdminServices
+│   └── ui/
+│       ├── icons/      # SVG care badge icons: IconSunLow, IconSunMedium, IconSunHigh, IconWaterLow, IconWaterMedium, IconWaterHigh
+│       └── ...         # Button, Input, Modal, Drawer, Toast, Spinner, Skeleton, Badge, etc.
 ├── pages/              # Route-level page components
 ├── core/
 │   ├── auth/           # AuthProvider, useAuth, authService
 │   ├── cart/           # CartProvider, useCart, sessionId.ts (guest cart)
 │   ├── wishlist/       # WishlistProvider, useWishlist
 │   └── supabase.ts     # Supabase client instance
-├── hooks/              # useProducts, useCategories, useScrollAnimation, useDebounce, etc.
-├── lib/                # whatsapp.ts, formatters.ts, validators.ts, constants.ts, types.ts
+├── hooks/              # useProducts, useProduct, useServices, useCategories, useImageUpload, useDebounce, useScrollAnimation, etc.
+├── lib/                # whatsapp.ts, formatters.ts, validators.ts, constants.ts, types.ts, fuzzyMatch.ts
 ├── styles/             # tokens.css + BEM component stylesheets
 ├── router.tsx
 ├── App.tsx
@@ -190,6 +196,8 @@ src/
 Auth uses Supabase email/password. Two roles: `admin` (Oscar — full CMS access) and `user` (customers — cart, wishlists, orders). Role is stored in `profiles.role`.
 
 Guest cart rows use `session_id` (UUID v4 from `localStorage`) instead of `user_id`. All guest access goes through `SECURITY DEFINER` RPCs (`guest_cart_*`). On login, `merge_guest_cart(p_session_id)` moves guest items into the authenticated cart automatically.
+
+Product and service photos are stored in the `greenlabs-images` Supabase Storage bucket (public read, admin write). The bucket is created by migration 006. Oscar uploads photos directly from `/admin/productos` and `/admin/servicios`.
 
 ---
 

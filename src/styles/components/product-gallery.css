@@ -1,0 +1,228 @@
+/* ── ProductGallery ── */
+.product-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Desktop: side-by-side (thumbs left, main right) */
+@media (min-width: 640px) {
+  .product-gallery {
+    flex-direction: row;
+  }
+}
+
+/* Thumbnails */
+.product-gallery__thumbs {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.product-gallery__thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .product-gallery__thumbs {
+    flex-direction: column;
+    overflow-x: visible;
+    overflow-y: auto;
+    width: 72px;
+    flex-shrink: 0;
+  }
+}
+
+.product-gallery__thumb-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 2px solid var(--color-sand-dark);
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color var(--transition-fast);
+  background: none;
+}
+
+@media (min-width: 640px) {
+  .product-gallery__thumb-btn {
+    width: 68px;
+    height: 68px;
+  }
+}
+
+.product-gallery__thumb-btn--active,
+.product-gallery__thumb-btn:hover {
+  border-color: var(--color-forest);
+}
+
+.product-gallery__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Main image */
+.product-gallery__main {
+  flex: 1;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: zoom-in;
+  position: relative;
+  background: var(--color-sand);
+}
+
+.product-gallery__main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 300ms ease;
+  display: block;
+}
+
+.product-gallery__main:hover .product-gallery__main-img {
+  transform: scale(1.02);
+}
+
+.product-gallery__zoom-hint {
+  position: absolute;
+  bottom: var(--space-3);
+  right: var(--space-3);
+  width: 32px;
+  height: 32px;
+  background: rgba(19, 47, 35, 0.65);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  pointer-events: none;
+}
+
+.product-gallery__main:hover .product-gallery__zoom-hint {
+  opacity: 1;
+}
+
+/* Empty state */
+.product-gallery--empty .product-gallery__placeholder {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-sand);
+}
+
+.product-gallery__placeholder-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.product-gallery__no-image-text {
+  position: absolute;
+  font-size: var(--text-xs);
+  color: var(--color-gray-400);
+  margin-top: var(--space-2);
+}
+
+/* ── Lightbox ── */
+.product-lightbox {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--color-forest-dark);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  max-width: 800px;
+  width: 100%;
+  max-height: 92vh;
+}
+
+.product-lightbox__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: rgba(19, 47, 35, 0.9);
+}
+
+.product-lightbox__counter {
+  font-size: var(--text-sm);
+  color: rgba(245, 240, 232, 0.7);
+  font-family: var(--font-ui);
+}
+
+.product-lightbox__close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(245, 240, 232, 0.12);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-sand);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.product-lightbox__close:hover {
+  background: rgba(245, 240, 232, 0.22);
+}
+
+.product-lightbox__image-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  min-height: 0;
+}
+
+.product-lightbox__image {
+  max-width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  display: block;
+}
+
+.product-lightbox__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(245, 240, 232, 0.15);
+  border: 1px solid rgba(245, 240, 232, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-sand);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  z-index: 2;
+}
+
+.product-lightbox__arrow:hover {
+  background: rgba(245, 240, 232, 0.28);
+}
+
+.product-lightbox__arrow--prev {
+  left: var(--space-3);
+}
+
+.product-lightbox__arrow--next {
+  right: var(--space-3);
+}

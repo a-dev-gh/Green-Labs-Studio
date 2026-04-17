@@ -16,7 +16,12 @@ React Router v6 with lazy-loaded route components. All public routes are Spanish
 ```
 /                           → Landing (public)
 /catalogo                   → Catalog (public)
-/catalogo/:slug             → ProductDetail (public)
+/catalogo/:slug             → ProductModal overlay rendered inside Catalog (public)
+                              Note: /catalogo/:slug is a nested child route of /catalogo.
+                              The modal overlays the product grid without unmounting it.
+                              Navigating to /catalogo/:slug directly (e.g. shared URL, page
+                              refresh) loads Catalog with the modal open. Closing the modal
+                              navigates back to /catalogo. See Section 13 for full details.
 /servicios                  → Services & Souvenir Packages (public)
 /carrito                    → Cart (public — guest cart via session_id; soft login banner shown)
 /cuestionario               → Quiz (public)
@@ -50,8 +55,9 @@ React Router v6 with lazy-loaded route components. All public routes are Spanish
   <Routes>
     <Route element={<PublicLayout />}>
       <Route index element={<Landing />} />
-      <Route path="catalogo" element={<Catalog />} />
-      <Route path="catalogo/:slug" element={<ProductDetail />} />
+      <Route path="catalogo" element={<Catalog />}>
+        <Route path=":slug" element={<ProductModal />} />
+      </Route>
       <Route path="servicios" element={<Services />} />
       <Route path="carrito" element={<Cart />} />
       <Route path="cuestionario" element={<Quiz />} />
@@ -606,3 +612,211 @@ export interface CartItem {
 - **db-builder** writes `supabase/migrations/20260417_005_guest_cart_session_id.sql` using the architect-specified SQL. Oscar must approve before applying.
 - **ui-builder** creates `src/core/cart/sessionId.ts`, updates `CartProvider.tsx` to branch, un-gates `/carrito` in `src/router.tsx`, updates `CartItem` in `src/lib/types.ts`, adds soft "Inicia sesión" banner on `Cart.tsx` for guests.
 - **documenter** updates README + this doc's Route Structure to mark `/carrito` public, adds `/cuestionario` and `/nosotros` routes, documents guest-cart flow for future contributors.
+
+---
+
+## 12. Image Storage — `greenlabs-images` Bucket
+
+> Author: @architect
+> Date: 2026-04-17
+> Status: DESIGN — ready for db-builder (migration 006) and ui-builder (ImageUploader)
+
+**Confidence: High | Risk: Low**
+
+### 12.1 Bucket
+
+- **Bucket id / name:** `greenlabs-images`
+- **Public:** `true` (anon SELECT via CDN)
+- **Write access:** admin role only (via `public.is_admin()` helper)
+- Migration file: `supabase/migrations/20260417_006_storage_bucket.sql`
+
+### 12.2 Folder + file naming conventions
+
+- Products: `products/{product-slug}/`
+- Services: `services/{service-slug}/`
+- File name pattern: `{timestamp}-{kebab-name}.webp`.
+- Max files per product: **6**. Max file size: **2 MB** (enforced client-side in `ImageUploader`).
+- All uploads are WEBP. JPG/PNG inputs are converted to WEBP in-browser via `<canvas>.toBlob('image/webp', 0.85)` before upload.
+
+### 12.3 RLS SQL
+
+```sql
+insert into storage.buckets (id, name, public)
+values ('greenlabs-images', 'greenlabs-images', true)
+on conflict (id) do nothing;
+
+create policy "greenlabs_images_public_read"
+  on storage.objects for select
+  using (bucket_id = 'greenlabs-images');
+
+create policy "greenlabs_images_admin_insert"
+  on storage.objects for insert
+  with check (bucket_id = 'greenlabs-images' and public.is_admin());
+
+create policy "greenlabs_images_admin_update"
+  on storage.objects for update
+  using (bucket_id = 'greenlabs-images' and public.is_admin());
+
+create policy "greenlabs_images_admin_delete"
+  on storage.objects for delete
+  using (bucket_id = 'greenlabs-images' and public.is_admin());
+```
+
+### 12.4 URL storage
+
+`products.images` and `services.images` store **fully-qualified public URLs** (not paths). Compose via `supabase.storage.from('greenlabs-images').getPublicUrl(path).data.publicUrl`.
+
+### 12.5 Cleanup contract
+
+When an admin deletes a product/service row, the admin UI **must first** call `supabase.storage.from('greenlabs-images').remove([...paths])` for every URL in `images[]` (paths extracted via `pathFromUrl()` helper), then delete the DB row.
+
+Known gap (v1): no background sweeper for mid-upload crashes. Acceptable; revisit when volume grows.
+
+---
+
+## 13. Product Modal Routing Pattern
+
+> Author: @architect
+> Date: 2026-04-17
+> Status: DESIGN — ready for ui-builder
+
+### 13.1 Route structure
+
+```tsx
+<Route path="catalogo" element={<Catalog />}>
+  <Route path=":slug" element={<ProductModal />} />
+</Route>
+```
+
+`Catalog.tsx` renders `<Outlet />` so the modal overlays the grid without unmounting it. Scroll position, search, filters preserved on open/close.
+
+### 13.2 Canonical URL
+
+- `/catalogo` — grid only.
+- `/catalogo/:slug` — grid + modal open. This is the canonical product URL.
+
+### 13.3 Close behavior
+
+```ts
+if (window.history.length > 1) navigate(-1);
+else navigate('/catalogo');
+```
+
+Triggers: backdrop click, ESC, × button.
+
+### 13.4 Accessibility
+
+- Focus trap, initial focus on close button.
+- `role="dialog"`, `aria-modal="true"`, `aria-labelledby` on product name.
+- Body scroll lock while open.
+
+### 13.5 Fate of `ProductDetail.tsx`
+
+Left in place but **unused** in v1. Old standalone route removed. Flagged for deletion in next cleanup.
+
+---
+
+## 14. `ImageUploader` Component Contract
+
+> Author: @architect
+> Date: 2026-04-17
+> Status: DESIGN — ready for ui-builder
+
+### 14.1 Props
+
+```ts
+type ImageUploaderProps = {
+  value: string[];                   // array of public URLs
+  onChange: (urls: string[]) => void;
+  folder: string;                    // e.g. "products/echeveria-hercules" — no trailing slash
+  maxFiles?: number;                 // default 6
+  maxBytesPerFile?: number;          // default 2 * 1024 * 1024
+  accept?: string;                   // default "image/webp, image/jpeg, image/png"
+};
+```
+
+### 14.2 Behavior
+
+For each dropped/selected file:
+1. Validate size + type.
+2. If not WEBP, convert via `<canvas>.toBlob('image/webp', 0.85)`.
+3. Upload: `supabase.storage.from('greenlabs-images').upload(${folder}/${Date.now()}-${kebab(name)}.webp, blob)`.
+4. Resolve public URL; call `onChange([...value, url])`.
+
+Per-file progress bars. No optimistic preview — previews only after upload resolves. Errors surface as inline toasts.
+
+### 14.3 Delete + reorder
+
+- Delete: `supabase.storage.remove([pathFromUrl(url)])` then `onChange(value.filter(u => u !== url))`.
+- Reorder: drag handle on thumbs; `onChange(newOrder)` (no storage round-trip — paths don't change).
+- Block new drops when `value.length >= maxFiles`.
+
+### 14.4 Helpers — `src/lib/storage.ts` (new)
+
+```ts
+export function uploadImage(folder: string, file: File | Blob): Promise<string>;
+export function deleteImage(url: string): Promise<void>;
+export function pathFromUrl(url: string): string; // strips ".../storage/v1/object/public/greenlabs-images/"
+```
+
+---
+
+## 15. Care-badge SVG Icon Spec
+
+> Author: @architect
+> Date: 2026-04-17
+> Status: DESIGN — ready for ui-builder
+
+### 15.1 Icon set (6 components)
+
+- `IconSunLow`, `IconSunMedium`, `IconSunHigh`
+- `IconWaterLow`, `IconWaterMedium`, `IconWaterHigh`
+
+Lives at `src/components/ui/icons/*.tsx`. One file per icon.
+
+### 15.2 Shared visual rules
+
+- `viewBox="0 0 20 20"`.
+- `stroke-width="1.5"`, `strokeLinecap="round"`, `strokeLinejoin="round"`.
+- `stroke="currentColor"` — parent controls color.
+- No fills (except optional accent dots, max 2 per icon).
+- Single `<path>` when feasible; else `<circle>` + `<line>` (no `<g>`).
+
+### 15.3 Progressive complexity
+
+Sun (light intensity):
+- `IconSunLow` — half-sun on horizon, 1 short ray.
+- `IconSunMedium` — full sun circle, 4 rays (N/E/S/W).
+- `IconSunHigh` — full sun circle, 8 rays (cardinals + ordinals); stroke nudged to 1.75.
+
+Water (watering frequency):
+- `IconWaterLow` — 1 droplet.
+- `IconWaterMedium` — 2 overlapping droplets.
+- `IconWaterHigh` — 3 droplets, triangle layout.
+
+### 15.4 Signature
+
+```tsx
+import type { SVGProps } from 'react';
+export default function IconSunLow(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      {/* paths */}
+    </svg>
+  );
+}
+```
+
+### 15.5 Consumption
+
+`src/components/catalog/CareBadges.tsx` maps `light_needs` / `water_needs` enums (`low | medium | high`) to the correct icon + Spanish label. On cards: icon-only pills. Inside modal: icon + label. Parent sets `color: var(--color-forest)` to drive stroke.
