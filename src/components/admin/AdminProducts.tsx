@@ -45,12 +45,14 @@ export default function AdminProducts() {
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    const [{ data: prods }, { data: cats }] = await Promise.all([
+    const [prodRes, catRes] = await Promise.all([
       supabase.from('products').select('*, category:categories(*)').order('created_at', { ascending: false }),
       supabase.from('categories').select('*').order('sort_order'),
     ]);
-    setProducts((prods as Product[]) || []);
-    setCategories((cats as Category[]) || []);
+    if (prodRes.error) setError(prodRes.error.message);
+    if (catRes.error) setError(catRes.error.message);
+    setProducts((prodRes.data as Product[]) || []);
+    setCategories((catRes.data as Category[]) || []);
     setIsLoading(false);
   }, []);
 
@@ -123,20 +125,26 @@ export default function AdminProducts() {
   const confirmDelete = async () => {
     if (!deleteConfirm) return;
     setDeleting(true);
+    setError(null);
 
     // Delete storage images first
     if (deleteConfirm.images.length > 0) {
       await Promise.allSettled(deleteConfirm.images.map(url => deleteImage(url)));
     }
 
-    await supabase.from('products').delete().eq('id', deleteConfirm.id);
+    const { error: err } = await supabase.from('products').delete().eq('id', deleteConfirm.id);
     setDeleting(false);
+    if (err) {
+      setError(`No se pudo eliminar: ${err.message}`);
+      return;
+    }
     setDeleteConfirm(null);
     fetchData();
   };
 
   const handleToggleActive = async (product: Product) => {
-    await supabase.from('products').update({ is_active: !product.is_active }).eq('id', product.id);
+    const { error: err } = await supabase.from('products').update({ is_active: !product.is_active }).eq('id', product.id);
+    if (err) { setError(`No se pudo actualizar: ${err.message}`); return; }
     fetchData();
   };
 

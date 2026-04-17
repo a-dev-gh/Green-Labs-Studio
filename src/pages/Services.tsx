@@ -14,8 +14,9 @@ export default function Services() {
 
   // Re-fire reveal animations when services load
   useEffect(() => {
+    let observer: IntersectionObserver | null = null;
     const timer = setTimeout(() => {
-      const observer = new IntersectionObserver(
+      observer = new IntersectionObserver(
         entries => entries.forEach(e => {
           const dir = (e.target as HTMLElement).dataset.reveal;
           if (e.isIntersecting) {
@@ -26,10 +27,12 @@ export default function Services() {
         }),
         { threshold: 0.08 }
       );
-      document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
-      return () => observer.disconnect();
+      document.querySelectorAll('[data-reveal]').forEach(el => observer!.observe(el));
     }, 100);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (observer) observer.disconnect();
+    };
   }, [items]);
 
   // Determine which services to render — DB data or a helpful loading state
