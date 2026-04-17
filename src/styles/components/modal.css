@@ -1,0 +1,50 @@
+/* ── Modal ── */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(19, 47, 35, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: modal-fade-in 180ms ease;
+}
+
+.modal__content {
+  position: relative;
+  z-index: 1;
+  background: var(--color-sand);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 24px 64px rgba(19, 47, 35, 0.25);
+  max-height: 92vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modal-slide-up 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  width: 100%;
+  max-width: 900px;
+  margin: var(--space-4);
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

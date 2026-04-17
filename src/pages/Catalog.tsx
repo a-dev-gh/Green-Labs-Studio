@@ -1,64 +1,119 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import imgHercules from '../../assets/echeveria-hercules.webp';
-import imgPerle from '../../assets/echeveria-perle.webp';
-import imgOrgyalis from '../../assets/kalanchoe-orgyalis.webp';
-import imgTomentosa from '../../assets/kalanchoe-tomentosa.webp';
+import { useState, useMemo } from 'react';
+import { Outlet } from 'react-router-dom';
+import { useProducts } from '../hooks/useProducts';
+import ProductCard from '../components/catalog/ProductCard';
+import SearchBox from '../components/catalog/SearchBox';
 import '../styles/pages/catalog.css';
-import '../styles/pages/landing.css';
+import '../styles/components/product-card.css';
+import '../styles/components/care-badges.css';
+import '../styles/components/search-box.css';
 
-const categories = ['Todas', 'Echeveria', 'Kalanchoe', 'Crassula', 'Sedum'];
+const CATEGORY_PILLS = ['Todas', 'Echeveria', 'Kalanchoe', 'Crassula', 'Sedum'];
 
-const allProducts = [
-  { slug: 'echeveria-hercules', name: "Echeveria 'Hercules'", category: 'Echeveria', price: 550, img: imgHercules, light: 'high', water: 'low' },
-  { slug: 'echeveria-perle', name: "Echeveria 'Perle von Nürnberg'", category: 'Echeveria', price: 480, img: imgPerle, light: 'medium', water: 'low' },
-  { slug: 'kalanchoe-orgyalis', name: 'Kalanchoe orgyalis', category: 'Kalanchoe', price: 420, img: imgOrgyalis, light: 'high', water: 'low' },
-  { slug: 'kalanchoe-tomentosa', name: 'Kalanchoe tomentosa', category: 'Kalanchoe', price: 380, img: imgTomentosa, light: 'medium', water: 'low' },
-  { slug: 'crassula-ovata', name: 'Crassula ovata', category: 'Crassula', price: 650, img: null, light: 'medium', water: 'moderate' },
-  { slug: 'crassula-perforata', name: 'Crassula perforata', category: 'Crassula', price: 350, img: null, light: 'high', water: 'low' },
-  { slug: 'sedum-morganianum', name: 'Sedum morganianum', category: 'Sedum', price: 520, img: null, light: 'high', water: 'moderate' },
-  { slug: 'sedum-rubrotinctum', name: 'Sedum rubrotinctum', category: 'Sedum', price: 300, img: null, light: 'high', water: 'low' },
-];
+function SkeletonCard() {
+  return (
+    <div className="product-card product-card--skeleton" aria-hidden="true">
+      <div className="product-card__image-wrap product-card__image-wrap--skeleton" />
+      <div className="product-card__body">
+        <div className="product-card__skeleton-line product-card__skeleton-line--sm" />
+        <div className="product-card__skeleton-line product-card__skeleton-line--lg" />
+        <div className="product-card__skeleton-line product-card__skeleton-line--md" />
+      </div>
+    </div>
+  );
+}
 
 export default function Catalog() {
-  const [active, setActive] = useState('Todas');
-  const filtered = active === 'Todas' ? allProducts : allProducts.filter(p => p.category === active);
+  const { items, isLoading, error, search } = useProducts();
+  const [query, setQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('Todas');
+
+  const filtered = useMemo(() => {
+    let result = query ? search(query) : items;
+    if (activeCategory !== 'Todas') {
+      result = result.filter(p => p.category?.name === activeCategory);
+    }
+    return result;
+  }, [items, query, activeCategory, search]);
 
   return (
     <div className="catalog">
       <h1 className="catalog__title">Catálogo</h1>
       <p className="catalog__subtitle">Suculentas seleccionadas con guía de cuidado incluida</p>
 
+      {/* Search */}
+      <div className="catalog__search">
+        <SearchBox value={query} onChange={setQuery} />
+      </div>
+
+      {/* Category pills */}
       <div className="catalog__pills">
-        {categories.map(cat => (
-          <button key={cat} onClick={() => setActive(cat)}
-            className={`catalog__pill ${active === cat ? 'catalog__pill--active' : ''}`}>
+        {CATEGORY_PILLS.map(cat => (
+          <button
+            key={cat}
+            onClick={() => setActiveCategory(cat)}
+            className={`catalog__pill${activeCategory === cat ? ' catalog__pill--active' : ''}`}
+          >
             {cat}
           </button>
         ))}
       </div>
 
-      <div className="catalog__grid">
-        {filtered.map(p => (
-          <Link to={`/catalogo/${p.slug}`} key={p.slug} className="product-card">
-            <div className="product-card__image-wrap">
-              {p.img ? (
-                <img src={p.img} alt={p.name} className="product-card__image" />
-              ) : (
-                <div className="product-card__placeholder">{p.name.charAt(0)}</div>
-              )}
-            </div>
-            <div className="product-card__body">
-              <h3 className="product-card__name">{p.name}</h3>
-              <p className="product-card__scientific">{p.category}</p>
-              <div className="product-card__footer">
-                <span className="product-card__price">RD$ {p.price}</span>
-                <div className="product-card__add">+</div>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+      {/* Error */}
+      {error && !isLoading && (
+        <div className="catalog__error">
+          <p>No se pudo cargar el catálogo. Intenta de nuevo más tarde.</p>
+        </div>
+      )}
+
+      {/* Loading skeleton */}
+      {isLoading && (
+        <div className="catalog__grid">
+          {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+      )}
+
+      {/* Grid */}
+      {!isLoading && !error && filtered.length > 0 && (
+        <div className="catalog__grid">
+          {filtered.map(product => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !error && filtered.length === 0 && items.length > 0 && (
+        <div className="catalog__empty">
+          <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="catalog__empty-icon">
+            <circle cx="21" cy="21" r="14" />
+            <line x1="32" y1="32" x2="44" y2="44" />
+            <line x1="16" y1="21" x2="26" y2="21" />
+          </svg>
+          <p className="catalog__empty-title">Sin resultados</p>
+          <p className="catalog__empty-text">
+            No encontramos suculentas que coincidan con "{query || activeCategory}".
+          </p>
+          <button
+            className="catalog__empty-reset"
+            onClick={() => { setQuery(''); setActiveCategory('Todas'); }}
+            type="button"
+          >
+            Ver todo el catálogo
+          </button>
+        </div>
+      )}
+
+      {/* Empty — no products at all */}
+      {!isLoading && !error && items.length === 0 && (
+        <div className="catalog__empty">
+          <p className="catalog__empty-title">Catálogo en construcción</p>
+          <p className="catalog__empty-text">Pronto tendremos suculentas disponibles.</p>
+        </div>
+      )}
+
+      {/* ProductModal renders here as a nested route overlay */}
+      <Outlet />
     </div>
   );
 }

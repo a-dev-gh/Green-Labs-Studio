@@ -3,23 +3,16 @@ import { Link } from 'react-router-dom';
 import HeroCarousel from '../components/landing/HeroCarousel';
 import TestimonialForm from '../components/landing/TestimonialForm';
 import SectionRail from '../components/layout/SectionRail';
+import ProductCard from '../components/catalog/ProductCard';
 import { useAuth } from '../core/auth/useAuth';
+import { useProducts } from '../hooks/useProducts';
 import aboutImg from '../../assets/about-oscar.webp';
-import imgHercules from '../../assets/echeveria-hercules.webp';
-import imgPerle from '../../assets/echeveria-perle.webp';
-import imgOrgyalis from '../../assets/kalanchoe-orgyalis.webp';
-import imgTomentosa from '../../assets/kalanchoe-tomentosa.webp';
 import souvenirGift from '../../assets/souvenir-gift-wrap.webp';
 import souvenirCollection from '../../assets/souvenir-collection.webp';
 import servicesPotted from '../../assets/services-potted.webp';
 import '../styles/pages/landing.css';
-
-const products = [
-  { name: "Echeveria 'Hercules'", scientific: 'Echeveria', price: 'RD$ 550', img: imgHercules },
-  { name: "Echeveria 'Perle von Nürnberg'", scientific: 'Echeveria', price: 'RD$ 480', img: imgPerle },
-  { name: 'Kalanchoe orgyalis', scientific: 'Kalanchoe', price: 'RD$ 420', img: imgOrgyalis },
-  { name: 'Kalanchoe tomentosa', scientific: 'Kalanchoe', price: 'RD$ 380', img: imgTomentosa },
-];
+import '../styles/components/product-card.css';
+import '../styles/components/care-badges.css';
 
 const testimonials = [
   { text: 'Mis suculentas llegaron perfectas. El empaque fue increíble.', name: 'María R.' },
@@ -135,6 +128,8 @@ function CanvasBackground({ scrollProgress, darkBlend }: { scrollProgress: numbe
 
 export default function Landing() {
   const { user } = useAuth();
+  const { items: allProducts } = useProducts();
+  const featuredProducts = allProducts.filter(p => p.is_featured);
   const [scrollProg, setScrollProg] = useState(0);
   const [darkBlend, setDarkBlend] = useState(0);
   const [testimonialFormOpen, setTestimonialFormOpen] = useState(false);
@@ -270,23 +265,13 @@ export default function Landing() {
               Nuestras <span className="featured__title-accent">suculentas</span>
             </h2>
             <p className="featured__desc">Seleccionadas a mano con guía de cuidado incluida.</p>
-            <div className="featured__grid">
-              {products.map((p, i) => (
-                <div key={i} className="product-card tilt-card">
-                  <div className="product-card__image-wrap">
-                    <img src={p.img} alt={p.name} className="product-card__image" />
-                  </div>
-                  <div className="product-card__body">
-                    <h3 className="product-card__name">{p.name}</h3>
-                    <p className="product-card__scientific">{p.scientific}</p>
-                    <div className="product-card__footer">
-                      <span className="product-card__price">{p.price}</span>
-                      <div className="product-card__add">+</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {featuredProducts.length > 0 && (
+              <div className="featured__grid">
+                {featuredProducts.map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

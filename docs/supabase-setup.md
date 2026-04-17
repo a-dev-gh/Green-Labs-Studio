@@ -12,12 +12,13 @@ Si algo da error en cualquier paso, para y enviaselo a Adrian con una captura de
 2. [Copiar tus credenciales](#2-copiar-tus-credenciales)
 3. [Configurar las variables de entorno](#3-configurar-las-variables-de-entorno)
 4. [Aplicar las migraciones de base de datos](#4-aplicar-las-migraciones-de-base-de-datos)
-5. [Agregar productos de prueba (opcional)](#5-agregar-productos-de-prueba-opcional)
-6. [Crear tu usuario administrador](#6-crear-tu-usuario-administrador)
-7. [Probar el carrito de invitado](#7-probar-el-carrito-de-invitado)
-8. [Probar inicio de sesion y fusion del carrito](#8-probar-inicio-de-sesion-y-fusion-del-carrito)
-9. [Solucion de problemas](#9-solucion-de-problemas)
-10. [Referencias](#10-referencias)
+5. [Subir fotos desde el panel de administracion](#5-subir-fotos-desde-el-panel-de-administracion)
+6. [Agregar productos de prueba (opcional)](#6-agregar-productos-de-prueba-opcional)
+7. [Crear tu usuario administrador](#7-crear-tu-usuario-administrador)
+8. [Probar el carrito de invitado](#8-probar-el-carrito-de-invitado)
+9. [Probar inicio de sesion y fusion del carrito](#9-probar-inicio-de-sesion-y-fusion-del-carrito)
+10. [Solucion de problemas](#10-solucion-de-problemas)
+11. [Referencias](#11-referencias)
 
 ---
 
@@ -133,12 +134,36 @@ Para cada archivo de migracion:
 | 3 | `supabase/migrations/20260408_003_rls_policies.sql` | Define quien puede leer o escribir en cada tabla |
 | 4 | `supabase/migrations/20260413_004_testimonial_user_status.sql` | Agrega columnas de estado y usuario a la tabla de testimonios |
 | 5 | `supabase/migrations/20260417_005_guest_cart_session_id.sql` | Habilita el carrito para visitantes sin cuenta (carrito de invitado) |
+| 6 | `supabase/migrations/20260417_006_storage_bucket.sql` | Crea el bucket de fotos `greenlabs-images` con permisos de lectura publica y escritura solo para admin |
+| 7 | `supabase/migrations/20260417_007_seed_products_services.sql` | Inserta los 4 succulentos iniciales y los 4 paquetes de servicios como filas en la base de datos |
 
-Despues de correr las 5 migraciones, puedes verificar que todo esta bien yendo a **Table Editor** en el sidebar — deberias ver todas las tablas listadas.
+Despues de correr las 7 migraciones, puedes verificar que todo esta bien yendo a **Table Editor** en el sidebar — deberias ver todas las tablas listadas. Para confirmar que el bucket se creo, ve a **Storage** en el sidebar — deberias ver `greenlabs-images` listado.
 
 ---
 
-## 5. Agregar productos de prueba (opcional)
+## 5. Subir fotos desde el panel de administracion
+
+La migracion 006 crea el bucket de almacenamiento `greenlabs-images` en Supabase Storage. Este bucket guarda todas las fotos del catalogo y de los servicios. **Las fotos no se suben automaticamente** — las agregas tu desde el panel de administracion del sitio.
+
+### Subir fotos de productos
+
+1. Inicia sesion en el sitio como administrador.
+2. Ve a `/admin/productos`.
+3. Haz clic en el boton de edicion del producto al que quieres agregarle fotos.
+4. En la seccion de fotos del formulario, arrastra las imagenes directamente desde tu computadora o haz clic en el area para seleccionarlas.
+5. El sitio acepta archivos JPG, PNG y WEBP de hasta 2MB cada uno. Los archivos JPG/PNG se convierten automaticamente a WEBP al subirse.
+6. Puedes agregar hasta 6 fotos por producto y reordenarlas arrastrando las miniaturas.
+7. Haz clic en **Guardar** cuando termines.
+
+### Subir fotos de servicios
+
+El proceso es identico, pero desde `/admin/servicios`. Cada servicio acepta una foto principal.
+
+> **Nota:** Los productos sembrados por la migracion 007 tienen el campo de fotos vacio al inicio. El sitio muestra un placeholder hasta que subes la primera foto real.
+
+---
+
+## 6. Agregar productos de prueba (opcional)
 
 Hay un archivo `supabase/seed.sql` con datos de ejemplo (productos, categorias, etc.) que puedes usar para probar el sitio antes de agregar tu catalogo real.
 
@@ -151,7 +176,7 @@ Si prefieres no usar datos de prueba, puedes agregar tus productos directamente 
 
 ---
 
-## 6. Crear tu usuario administrador
+## 7. Crear tu usuario administrador
 
 El sitio tiene dos tipos de usuarios: `user` (clientes normales) y `admin` (tu — acceso completo al panel de administracion). Por defecto, todos los usuarios nuevos son `user`. Necesitas crear tu cuenta y luego ascenderla a `admin`.
 
@@ -199,7 +224,7 @@ El sitio tiene dos tipos de usuarios: `user` (clientes normales) y `admin` (tu �
 
 ---
 
-## 7. Probar el carrito de invitado
+## 8. Probar el carrito de invitado
 
 Esta prueba confirma que cualquier visitante puede comprar sin necesidad de crear una cuenta.
 
@@ -217,7 +242,7 @@ Si WhatsApp no abre o el carrito aparece vacio, es probable que la migracion 005
 
 ---
 
-## 8. Probar inicio de sesion y fusion del carrito
+## 9. Probar inicio de sesion y fusion del carrito
 
 Esta prueba confirma que cuando un invitado inicia sesion, sus productos no se pierden.
 
@@ -231,20 +256,21 @@ Si el carrito aparece vacio despues del login, revisa que la migracion 005 inclu
 
 ---
 
-## 9. Solucion de problemas
+## 10. Solucion de problemas
 
 | Sintoma | Causa probable | Que hacer |
 |---|---|---|
 | El carrito no carga / errores 404 en el carrito | La migracion 005 no fue aplicada | Vuelve al paso 4 y aplica `20260417_005_guest_cart_session_id.sql` |
 | "new row violates row-level security policy" | La migracion 003 no fue aplicada, o el perfil de usuario no se creo automaticamente | Verifica que aplicaste las migraciones en orden. Si el problema es el perfil, avisa a Adrian. |
 | Pagina en blanco despues de iniciar sesion | Las variables de entorno no estan configuradas o Vite no las cargo | Revisa el archivo `.env.local`, asegurate de que los valores son correctos, y reinicia `npm run dev`. Abre la consola del navegador (F12) para ver el error exacto. |
-| El panel `/admin` dice "no autorizado" | Tu usuario no tiene `role = 'admin'` | Repite el paso 6C con tu UUID correcto. |
+| El panel `/admin` dice "no autorizado" | Tu usuario no tiene `role = 'admin'` | Repite el paso 7C con tu UUID correcto. |
 | El correo de invitacion no llega | El correo puede estar en spam | Revisa la carpeta de spam. Si no llega en 5 minutos, en Supabase > Authentication > Users haz clic en los tres puntos junto a tu usuario y selecciona "Send password recovery". |
 | "0 rows affected" en el UPDATE del rol | El perfil no se creo en la tabla `profiles` | Esto significa que el trigger `on_auth_user_created` no corrio. Avisa a Adrian con una captura del error. |
+| Subi una foto pero no aparece en el sitio | El bucket no esta configurado correctamente o la URL no se guardo en la base de datos | Revisa en el dashboard de Supabase: ve a **Storage** y confirma que el bucket `greenlabs-images` existe y que la columna **Public** dice `true`. Luego ve a **Table Editor** > tabla `products` y confirma que el campo `images` de ese producto contiene la URL publica completa de la foto (debe empezar con `https://`). Si el array esta vacio, edita el producto desde `/admin/productos` y vuelve a subir la foto. Si el problema persiste, avisa a Adrian con una captura de la seccion Storage del dashboard. |
 
 ---
 
-## 10. Referencias
+## 11. Referencias
 
 - **Diseno de la base de datos y carrito de invitado:** `docs/architecture.md` — seccion 11
 - **Modelos de datos (todas las tablas y columnas):** `docs/data-models.md`

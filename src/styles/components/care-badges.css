@@ -1,0 +1,54 @@
+/* ── CareBadges ── */
+.care-badges {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  color: var(--color-forest);
+}
+
+.care-badges__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-forest);
+  white-space: nowrap;
+}
+
+/* Compact (icon-only) — used on product cards */
+.care-badges--compact .care-badges__badge {
+  background: rgba(27, 67, 50, 0.08);
+  padding: 4px 6px;
+}
+
+/* Labeled — used inside modal */
+.care-badges--labeled .care-badges__badge {
+  background: rgba(27, 67, 50, 0.07);
+  padding: 6px 10px;
+  gap: var(--space-2);
+}
+
+.care-badges__label {
+  font-size: var(--text-xs);
+  font-family: var(--font-ui);
+}
+
+.care-badges__badge--sun {
+  color: #8B6914;
+  background: rgba(139, 105, 20, 0.10);
+}
+
+.care-badges__badge--water {
+  color: #1B5A7A;
+  background: rgba(27, 90, 122, 0.10);
+}
+
+.care-badges--labeled .care-badges__badge--sun {
+  background: rgba(139, 105, 20, 0.08);
+}
+
+.care-badges--labeled .care-badges__badge--water {
+  background: rgba(27, 90, 122, 0.08);
+}

@@ -1,0 +1,70 @@
+/* ── SearchBox ── */
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.search-box__icon {
+  position: absolute;
+  left: var(--space-4);
+  color: var(--color-gray-400);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.search-box__input {
+  width: 100%;
+  padding: 12px var(--space-10) 12px 44px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-sand-dark);
+  background: var(--color-sand);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-forest);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-box__input::placeholder {
+  color: var(--color-gray-400);
+}
+
+.search-box__input:focus {
+  border-color: var(--color-forest);
+  box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.1);
+}
+
+/* Remove default search input decorations */
+.search-box__input::-webkit-search-cancel-button,
+.search-box__input::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+.search-box__clear {
+  position: absolute;
+  right: var(--space-4);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gray-200);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--color-gray-500);
+  padding: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.search-box__clear:hover {
+  background: var(--color-gray-300);
+  color: var(--color-forest);
+}

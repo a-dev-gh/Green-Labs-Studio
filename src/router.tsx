@@ -6,7 +6,8 @@ import { AdminRoute } from './components/auth/AdminRoute';
 
 const Landing = lazy(() => import('./pages/Landing'));
 const Catalog = lazy(() => import('./pages/Catalog'));
-const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+// ProductDetail is kept on disk (arch § 13.5) but not imported in this version
+const ProductModal = lazy(() => import('./components/catalog/ProductModal'));
 const Services = lazy(() => import('./pages/Services'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Login = lazy(() => import('./pages/Login'));
@@ -50,8 +51,10 @@ export function AppRouter() {
       <Routes>
         <Route element={<PublicLayout />}>
           <Route index element={<Landing />} />
-          <Route path="catalogo" element={<Catalog />} />
-          <Route path="catalogo/:slug" element={<ProductDetail />} />
+          <Route path="catalogo" element={<Catalog />}>
+            <Route path=":slug" element={<ProductModal />} />
+          </Route>
+          {/* ProductDetail kept on disk but removed from routing (arch § 13.5) */}
           <Route path="servicios" element={<Services />} />
           <Route path="blog" element={<Blog />} />
           <Route path="nosotros" element={<About />} />

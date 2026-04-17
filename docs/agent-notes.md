@@ -180,3 +180,30 @@ Orchestrator re-reads this file after architect reports DONE, verifies `docs/dat
 **Open items — action required:**
 - [ ] hero-1.webp through hero-4.webp: real lifestyle photos not yet available — placeholder images are in place. Oscar to provide final images (table, library, kitchen, bathroom settings).
 - [ ] Supabase migration `20260417_005_guest_cart_session_id.sql`: migration is written and reviewed but NOT applied. Oscar must approve schema + RLS changes, then Adrian applies via Supabase dashboard or CLI. See `docs/data-models.md` for full SQL details.
+
+---
+
+## SESSION — 2026-04-17 — Catalog overhaul + Services CMS + About fix
+
+Plan source: `C:\Users\elchi\.claude\plans\frolicking-swinging-robin.md`
+
+### What shipped
+
+- URL-backed product modal with photo gallery — clicking any product card or pasting `/catalogo/:slug` opens the modal overlay; browser back closes it
+- Client-side fuzzy search — debounced 120ms, diacritic-insensitive, highlights matched text in olive; combined with category filter pills
+- SVG care badges — 6 custom inline SVG icons (3 sun levels, 3 water levels) rendered as pills on every product card and expanded with labels inside the modal
+- AdminProducts full CRUD — table view, side drawer form, drag-and-drop image upload via `<ImageUploader>` backed by Supabase Storage bucket `greenlabs-images`
+- AdminServices full CRUD — table view with drag-handle reorder, side drawer form, single-image upload per service
+- Alternating full-bleed Services redesign — each service section is `85vh` with a sticky glass-card text panel, alternating left/right layout (Aesop-style editorial)
+- About hero reframed — hero reduced to `50vh`, `object-position: center 30%` shows Oscar's face; glass card overlay holds eyebrow + title + intro copy
+- Landing featured products pulled from DB — `useProducts()` with `is_featured` filter replaces hardcoded array; `<ProductCard>` with care badges used site-wide
+- Migration 006 — `20260417_006_storage_bucket.sql` creates the `greenlabs-images` Storage bucket with RLS (anon read, admin write)
+- Migration 007 — `20260417_007_seed_products_services.sql` inserts the 4 current succulents and 4 service packages as DB rows
+
+### Open items — action required
+
+- [ ] Oscar must apply migration 006 (`20260417_006_storage_bucket.sql`) via Supabase SQL Editor before uploading any photos.
+- [ ] Oscar must apply migration 007 (`20260417_007_seed_products_services.sql`) to seed the catalog and services pages with initial data.
+- [ ] Products are seeded with empty `images[]` arrays. Oscar uploads product photos via `/admin/productos` after the migrations are applied.
+- [ ] `ProductDetail.tsx` (the old standalone page) is now dead code — the modal is the only product detail surface. Flagged for removal in the next cleanup pass.
+- [ ] `scientific_name` is referenced in the fuzzy search and modal UI but is not a column in the current `products` schema. Flag as follow-up: add the column in a future migration or confirm it maps to an existing field.
