@@ -1,3 +1,5 @@
+import AdminSoon from './AdminSoon';
+
 export default function AdminContent() {
-  return <div className="admin-page"><h1>AdminContent</h1></div>;
+  return <AdminSoon title="Contenido" description="Edita el texto de la página 'Nosotros', políticas y otros contenidos estáticos." />;
 }

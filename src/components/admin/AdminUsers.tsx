@@ -1,3 +1,5 @@
+import AdminSoon from './AdminSoon';
+
 export default function AdminUsers() {
-  return <div className="admin-page"><h1>AdminUsers</h1></div>;
+  return <AdminSoon title="Usuarios" description="Lista de clientes registrados y gestión de roles." />;
 }

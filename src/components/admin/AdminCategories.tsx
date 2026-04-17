@@ -1,3 +1,5 @@
+import AdminSoon from './AdminSoon';
+
 export default function AdminCategories() {
-  return <div className="admin-page"><h1>AdminCategories</h1></div>;
+  return <AdminSoon title="Categorías" description="Agrupa las suculentas por tipo, tamaño o cuidado." />;
 }

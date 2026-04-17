@@ -1,4 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom';
+import '../../styles/components/admin-layout.css';
 
 const adminLinks = [
   { to: '/admin', label: 'Dashboard', end: true },
