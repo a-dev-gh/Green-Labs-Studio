@@ -22,6 +22,7 @@ export default function Footer() {
           <nav className="footer__nav">
             <Link to="/catalogo" className="footer__nav-link">Catálogo</Link>
             <Link to="/servicios" className="footer__nav-link">Servicios</Link>
+            <Link to="/nosotros" className="footer__nav-link">Nosotros</Link>
             <Link to="/blog" className="footer__nav-link">Blog</Link>
             <Link to="/cuenta/perfil" className="footer__nav-link">Mi Cuenta</Link>
           </nav>

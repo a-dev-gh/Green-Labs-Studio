@@ -134,3 +134,26 @@
   font-size: var(--text-xl);
   font-weight: var(--font-weight-bold);
 }
+
+.cart__guest-banner {
+  background: var(--color-sand);
+  border: 1px solid var(--color-forest);
+  border-left: 4px solid var(--color-forest);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--color-forest);
+  line-height: 1.5;
+}
+
+.cart__guest-banner a {
+  color: var(--color-forest);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cart__guest-banner a:hover {
+  opacity: 0.75;
+}

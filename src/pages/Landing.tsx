@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import SucculentQuiz from '../components/landing/SucculentQuiz';
+import HeroCarousel from '../components/landing/HeroCarousel';
 import TestimonialForm from '../components/landing/TestimonialForm';
 import { useAuth } from '../core/auth/useAuth';
-import heroImg from '../../assets/hero-oscar.webp';
 import aboutImg from '../../assets/about-oscar.webp';
 import imgHercules from '../../assets/echeveria-hercules.webp';
 import imgPerle from '../../assets/echeveria-perle.webp';
@@ -137,7 +136,6 @@ export default function Landing() {
   const { user } = useAuth();
   const [scrollProg, setScrollProg] = useState(0);
   const [darkBlend, setDarkBlend] = useState(0);
-  const [quizOpen, setQuizOpen] = useState(false);
   const [testimonialFormOpen, setTestimonialFormOpen] = useState(false);
   const testiRef = useRef<HTMLElement>(null);
 
@@ -190,45 +188,8 @@ export default function Landing() {
       <CanvasBackground scrollProgress={scrollProg} darkBlend={darkBlend} />
 
       <div style={{ position: 'relative', zIndex: 1 }}>
-        {/* Hero */}
-        <section className="hero">
-          {/* Left: Oscar */}
-          <div className="hero__visual">
-            <div className="hero__oscar-wrap">
-              <img src={heroImg} alt="Oscar - GREENLABS" className="hero__oscar" />
-            </div>
-          </div>
-
-          {/* Right: text + quiz pill */}
-          <div className="hero__info">
-            <p className="hero__eyebrow">Greenlabs Botanics</p>
-            <h1 className="hero__title">Tu próxima<br />suculenta</h1>
-            <h1 className="hero__title hero__title--accent">te espera</h1>
-            <p className="hero__subtitle">
-              Suculentas seleccionadas con amor en Santiago de los Caballeros.
-            </p>
-
-            <div className="hero__badges">
-              <div className="hero__badge">
-                <span className="hero__badge-number">200+</span>
-                <span className="hero__badge-label">Suculentas</span>
-              </div>
-              <div className="hero__badge">
-                <span className="hero__badge-number">15</span>
-                <span className="hero__badge-label">Variedades</span>
-              </div>
-              <div className="hero__badge">
-                <span className="hero__badge-number">50+</span>
-                <span className="hero__badge-label">Clientes felices</span>
-              </div>
-            </div>
-
-            <button className="hero__cta" onClick={() => setQuizOpen(true)}>
-              <span className="hero__cta-lead">¿Te gustaría encontrar tu suculenta ideal?</span>
-              <span className="hero__cta-action">Toma este pequeño cuestionario →</span>
-            </button>
-          </div>
-        </section>
+        {/* Hero Carousel */}
+        <HeroCarousel />
 
         {/* How It Works */}
         <section className="how-it-works">
@@ -418,7 +379,6 @@ export default function Landing() {
         </section>
       </div>
 
-      {quizOpen && <SucculentQuiz onClose={() => setQuizOpen(false)} />}
       {testimonialFormOpen && (
         <TestimonialForm
           onClose={() => setTestimonialFormOpen(false)}

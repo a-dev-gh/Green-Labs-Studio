@@ -18,7 +18,9 @@ React Router v6 with lazy-loaded route components. All public routes are Spanish
 /catalogo                   → Catalog (public)
 /catalogo/:slug             → ProductDetail (public)
 /servicios                  → Services & Souvenir Packages (public)
-/carrito                    → Cart (auth required)
+/carrito                    → Cart (public — guest cart via session_id; soft login banner shown)
+/cuestionario               → Quiz (public)
+/nosotros                   → About (public)
 /cuenta                     → Account layout (auth required)
   /cuenta/perfil            → Profile settings
   /cuenta/pedidos           → Order history
@@ -51,13 +53,15 @@ React Router v6 with lazy-loaded route components. All public routes are Spanish
       <Route path="catalogo" element={<Catalog />} />
       <Route path="catalogo/:slug" element={<ProductDetail />} />
       <Route path="servicios" element={<Services />} />
+      <Route path="carrito" element={<Cart />} />
+      <Route path="cuestionario" element={<Quiz />} />
+      <Route path="nosotros" element={<About />} />
       <Route path="auth/login" element={<Login />} />
       <Route path="auth/registro" element={<Signup />} />
       <Route path="auth/recuperar" element={<ForgotPassword />} />
       <Route path="auth/reset" element={<ResetPassword />} />
     </Route>
     <Route element={<ProtectedRoute />}>
-      <Route path="carrito" element={<Cart />} />
       <Route path="cuenta" element={<AccountLayout />}>
         <Route path="perfil" element={<Profile />} />
         <Route path="pedidos" element={<Orders />} />
@@ -113,6 +117,7 @@ src/
 │   │   └── ResetPasswordForm.tsx
 │   ├── landing/
 │   │   ├── Hero.tsx
+│   │   ├── HeroCarousel.tsx
 │   │   ├── LeafAnimation.tsx
 │   │   ├── AboutSection.tsx
 │   │   ├── FeaturedProducts.tsx
@@ -192,6 +197,8 @@ src/
 │   ├── ProductDetail.tsx
 │   ├── Services.tsx
 │   ├── Cart.tsx
+│   ├── Quiz.tsx
+│   ├── About.tsx
 │   ├── Login.tsx
 │   ├── Signup.tsx
 │   ├── ForgotPassword.tsx
@@ -208,7 +215,8 @@ src/
 │   │   └── authService.ts
 │   ├── cart/
 │   │   ├── CartProvider.tsx
-│   │   └── useCart.ts
+│   │   ├── useCart.ts
+│   │   └── sessionId.ts
 │   ├── wishlist/
 │   │   ├── WishlistProvider.tsx
 │   │   └── useWishlist.ts
@@ -310,11 +318,12 @@ Trigger: On `auth.users` INSERT → create `profiles` row with `role = 'user'`.
 | Column | Type | Constraints |
 |---|---|---|
 | id | uuid | PK |
-| user_id | uuid | FK → profiles(id) ON DELETE CASCADE |
+| user_id | uuid | FK → profiles(id) ON DELETE CASCADE, NULL for guests |
+| session_id | text | NULL for authenticated users |
 | product_id | uuid | FK → products(id) ON DELETE CASCADE |
-| quantity | integer | DEFAULT 1, CHECK (> 0) |
+| quantity | integer | DEFAULT 1, CHECK (> 0, <= 99) |
 
-UNIQUE on `(user_id, product_id)` — use UPSERT.
+UNIQUE on `(user_id, product_id)` and `(session_id, product_id)`. CHECK: `(user_id IS NOT NULL) <> (session_id IS NOT NULL)` — exactly one owner per row. See Section 11 for the full guest-cart design.
 
 ### 3.7 wishlists
 | Column | Type | Constraints |
@@ -494,3 +503,106 @@ VITE_WHATSAPP_NUMBER=      # BLOCKED
 | Supabase project credentials | Adrian |
 | Oscar's admin email | Adrian |
 | Domain DNS (greenlabs.studio) | Adrian |
+
+---
+
+## 11. Guest Cart (Session-ID Unified Schema)
+
+> Author: @architect
+> Date: 2026-04-17
+> Status: DESIGN — ready for db-builder (migration) and ui-builder (client wiring)
+> Supersedes: the auth-only `cart_items` contract from Section 3.6 of the initial schema.
+
+**Confidence: High | Risk: Medium**
+
+### 11.1 Goal
+
+Allow anonymous visitors to add succulents to a cart and check out via WhatsApp without creating an account, while preserving the existing authenticated-user cart flow and enabling a seamless merge when a guest later logs in.
+
+### 11.2 Chosen approach — Unified `cart_items` with exclusive `user_id` / `session_id`
+
+A single `cart_items` table holds both guest and authenticated rows. Each row is owned by exactly one of:
+
+- `user_id uuid` (authenticated — FK to `profiles.id`), or
+- `session_id text` (guest — cryptographically random UUID v4 stored in browser `localStorage`).
+
+CHECK constraint: `(user_id IS NOT NULL) <> (session_id IS NOT NULL)`.
+
+**Why unified (not a separate `guest_cart_items` table):**
+- One RLS surface, one TypeScript shape, one merge routine, one query in CartProvider.
+- Merge-on-login is a single `UPDATE`/`INSERT...ON CONFLICT` instead of cross-table migration.
+- Admin "view all carts" dashboards stay a single query.
+
+### 11.3 RLS — RPC-only anon access (REJECTED header approach)
+
+We evaluated two options:
+
+- **Option A — `x-session-id` header in RLS USING clause.** Rejected. PostgREST custom-header forwarding is inconsistent, the session id travels on every request widening exposure, and troubleshooting tends to open policies too widely.
+- **Option B — RPC-only (CHOSEN).** Anon has no direct SELECT/INSERT/UPDATE/DELETE on `cart_items`. All guest access is via `SECURITY DEFINER` RPCs that take `p_session_id text` as a parameter, validate its shape, and scope all access to rows where `session_id = p_session_id`.
+
+RPC suite:
+
+- `guest_cart_list(p_session_id text) → TABLE(...)`
+- `guest_cart_add(p_session_id text, p_product_id uuid, p_quantity int) → void`
+- `guest_cart_update_quantity(p_session_id text, p_product_id uuid, p_quantity int) → void`
+- `guest_cart_remove(p_session_id text, p_product_id uuid) → void`
+- `guest_cart_clear(p_session_id text) → void`
+- `merge_guest_cart(p_session_id text) → integer` (auth-only; moves rows to `auth.uid()`)
+
+See the migration file `supabase/migrations/20260417_005_guest_cart_session_id.sql` (owned by db-builder) for the full SQL.
+
+### 11.4 Client contract
+
+`src/core/cart/sessionId.ts` (new):
+
+```ts
+const SESSION_KEY = 'greenlabs:guest_session_id';
+export function getOrCreateSessionId(): string;  // v4 via crypto.randomUUID
+export function getSessionId(): string | null;
+export function clearSessionId(): void;          // called after merge on login
+```
+
+`CartProvider.tsx` branches on `user`:
+
+- `user` present → existing path, `supabase.from('cart_items')`.
+- `user` null → `supabase.rpc('guest_cart_*', { p_session_id })`.
+
+Context shape (`items`, `addItem`, `removeItem`, etc.) is unchanged so consumers don't change.
+
+**Merge-on-login flow:**
+
+1. `useAuth()` transitions `user: null → user: <id>`.
+2. CartProvider effect sees the transition, reads `getSessionId()`.
+3. If a guest session exists: call `merge_guest_cart({ p_session_id })`, then `clearSessionId()`, then `fetchCart()` against the authed identity.
+4. `merge_guest_cart` (SECURITY DEFINER) upserts guest rows into `(user_id, product_id)`, combining quantities on conflict, then deletes remaining guest rows.
+
+### 11.5 TypeScript interface — `src/lib/types.ts`
+
+```ts
+export interface CartItem {
+  id: string;
+  user_id: string | null;     // was: string
+  session_id: string | null;  // NEW
+  product_id: string;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
+  product?: Product;
+}
+```
+
+### 11.6 Security review
+
+- **Unguessable session ids.** `crypto.randomUUID()` = 122 random bits, ~5.3×10³⁶ values; brute force infeasible under normal rate limits.
+- **Session id never leaves localStorage + RPC body.** Not in URLs, not in headers, HTTPS only.
+- **Shape validation server-side.** RPCs reject non-UUID-shaped input.
+- **No anon SELECT policy on `cart_items`.** Even with a leaked session id, direct DML is blocked; only RPC access is possible.
+- **Cart data is low-sensitivity.** Product ids + quantities only. No PII or payment info (WhatsApp handles checkout out of band).
+- **Post-MVP nice-to-have:** scheduled TTL job to delete guest rows older than 30 days.
+- **Residual risk: cross-device XSS.** If an XSS ships, localStorage leaks; mitigated by CSP. Stolen guest cart confers no PII and no account takeover.
+
+### 11.7 Handoff
+
+- **db-builder** writes `supabase/migrations/20260417_005_guest_cart_session_id.sql` using the architect-specified SQL. Oscar must approve before applying.
+- **ui-builder** creates `src/core/cart/sessionId.ts`, updates `CartProvider.tsx` to branch, un-gates `/carrito` in `src/router.tsx`, updates `CartItem` in `src/lib/types.ts`, adds soft "Inicia sesión" banner on `Cart.tsx` for guests.
+- **documenter** updates README + this doc's Route Structure to mark `/carrito` public, adds `/cuestionario` and `/nosotros` routes, documents guest-cart flow for future contributors.

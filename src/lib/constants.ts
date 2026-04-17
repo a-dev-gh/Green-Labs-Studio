@@ -1,7 +1,7 @@
 export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '18495252430';
 
 export const SITE_NAME = 'GREENLABS Botanics';
-export const SITE_TAGLINE = 'Suculentas que transforman espacios';
+export const SITE_TAGLINE = 'Una marca que enseña a cuidar';
 export const SITE_LOCATION = 'Santiago de los Caballeros, RD';
 
 export const CURRENCY = 'RD$';

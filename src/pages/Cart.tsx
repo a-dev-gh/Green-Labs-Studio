@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../core/cart/CartProvider';
+import { useAuth } from '../core/auth/useAuth';
 import '../styles/pages/cart.css';
 import '../styles/components/button.css';
 
 export default function Cart() {
   const { items, itemCount, total, removeItem, updateQuantity, getWhatsAppLink } = useCart();
+  const { user } = useAuth();
 
   if (items.length === 0) {
     return (
@@ -23,6 +25,13 @@ export default function Cart() {
   return (
     <div className="cart">
       <h1 className="cart__title">Tu Carrito ({itemCount})</h1>
+      {items.length > 0 && !user && (
+        <div className="cart__guest-banner">
+          <span>¿Tienes cuenta? </span>
+          <Link to="/auth/login">Iniciar sesión</Link>
+          <span> para guardar tu carrito.</span>
+        </div>
+      )}
       <div className="cart__list">
         {items.map(item => (
           <div key={item.id} className="cart-item">

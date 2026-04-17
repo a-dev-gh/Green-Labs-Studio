@@ -94,3 +94,89 @@ TASK-001 → TASK-002 + TASK-003 (parallel) → TASK-004 + TASK-005 (parallel) �
 - Deployment: Site deployed to Cloudflare Workers at `greenlabsstudio.adraa19al.workers.dev`.
 
 **Next:** TASK-006 (@code-reviewer) can now begin. TASK-007 and TASK-008 follow in sequence.
+
+---
+
+## SESSION — 2026-04-17 — Hero rework + Quiz page + Guest checkout + Polish
+
+Plan source: `C:\Users\elchi\.claude\plans\frolicking-swinging-robin.md`
+Confidence: High | Risk: Med (schema + RLS change on `cart_items`)
+
+### Dispatch order (strict — do not skip phases)
+
+```
+PHASE 1: ARCHITECT
+   └─> PHASE 2: DB-BUILDER (gated on Oscar approval)
+                UI-BUILDER + DEBUGGER (parallel, disjoint files)
+                   └─> PHASE 3: DOCUMENTER
+```
+
+### Phase 1 — Architect (runs first, blocks everything else)
+
+- [ ] TASK-001 | @architect | Design guest-cart session-id model (add `session_id text null`, nullable `user_id`, CHECK exactly-one), RLS policy deltas for anon, merge-on-login RPC shape, `sessionId.ts` helper contract, TypeScript interface updates for `CartItem` / `CartProvider`. | DONE when: `docs/architecture.md` updated with "Guest Cart" section AND `docs/data-models.md` created with the full `cart_items` target schema + RLS rules + merge RPC signature.
+- **Files owned:** `docs/architecture.md`, `docs/data-models.md` (new)
+- **Blocks:** TASK-002, TASK-003, TASK-004
+
+### Phase 2 — Runs after architect signs off
+
+- [ ] TASK-002 | @db-builder | Write migration adding `session_id` to `cart_items`, update RLS for anon access keyed on `x-session-id`, add merge RPC. | DONE when: `supabase/migrations/<timestamp>_guest_cart_session_id.sql` exists with forward + rollback SQL, documented in the migration header. **GATE: BLOCKED until Oscar approves migration content — do not apply.**
+- **Files owned:** `supabase/migrations/<timestamp>_guest_cart_session_id.sql`
+
+- [ ] TASK-003 | @ui-builder | Hero carousel, Quiz page, About page, 404 polish, footer tagline, un-gate `/carrito`, CartProvider guest branch, Navbar/Footer `/nosotros` link. | DONE when: all listed files exist/updated, `npm run build` passes locally, CTA on hero links to `/cuestionario`, footer reads "Una marca que enseña a cuidar".
+- **Files owned (new):** `src/pages/Quiz.tsx`, `src/pages/About.tsx`, `src/styles/pages/quiz.css`, `src/styles/pages/about.css`, `src/components/landing/HeroCarousel.tsx`, `src/styles/components/hero-carousel.css`, `src/core/cart/sessionId.ts`
+- **Files owned (modified):** `src/pages/Landing.tsx`, `src/components/landing/SucculentQuiz.tsx`, `src/router.tsx`, `src/lib/constants.ts`, `src/pages/NotFound.tsx`, `src/styles/pages/not-found.css`, `src/core/cart/CartProvider.tsx`, `src/pages/Cart.tsx`, Navbar + Footer components (add `/nosotros` link only)
+
+- [ ] TASK-004 | @debugger | Fix broken services reveal animation. | DONE when: `[data-reveal]` defaults to hidden state, three souvenir sections slide in from left/right/left on scroll with no flash on initial paint, verified in Chrome + mobile viewport.
+- **Files owned:** `src/styles/animations.css` (lines 100-111 region only)
+
+**Parallel safety:** TASK-003 and TASK-004 operate on disjoint files. ui-builder must NOT touch `src/styles/animations.css`. debugger must NOT touch any file in TASK-003's list.
+
+### Phase 3 — Documenter
+
+- [ ] TASK-005 | @documenter | Update public-facing docs to reflect new routes and guest cart flow. | DONE when: `docs/architecture.md` route table includes `/cuestionario` and `/nosotros`, guest cart flow documented, README (if touched) reflects new routes.
+- **Files owned:** `docs/architecture.md`, `README.md` (if present), `docs/agent-notes.md` (session close entry only)
+
+### Gates
+
+- Architect must complete TASK-001 before db-builder, ui-builder, or debugger start.
+- **db-builder is BLOCKED on Oscar's explicit approval** of migration content before writing (migration touches auth/RLS — per CLAUDE.md rule).
+- ui-builder CartProvider changes depend on architect's `sessionId.ts` contract — cannot begin cart wiring until TASK-001 is DONE.
+- No agent runs `git add`, `git commit`, or `git push`. Adrian runs all git commands.
+
+### Blocked on Adrian / Oscar
+
+- [ ] Oscar approves `cart_items` schema + RLS deltas before db-builder applies migration.
+- [ ] Confirm new Navbar slot for `/nosotros` (order: Inicio, Catálogo, Servicios, Nosotros, Blog).
+
+### Next check-in
+
+Orchestrator re-reads this file after architect reports DONE, verifies `docs/data-models.md` exists, then dispatches Phase 2.
+
+---
+
+## SESSION CLOSE — 2026-04-17
+
+**Summary:** Phases 1–3 completed. Hero reworked, guest checkout shipped, new pages added, animation bug fixed.
+
+**Agents dispatched:**
+- @architect (Phase 1) — guest cart schema design, `docs/architecture.md` Section 11, `docs/data-models.md`
+- @orchestrator — plan coordination and phase gating across all tasks
+- @db-builder (Phase 2) — migration `20260417_005_guest_cart_session_id.sql` with `session_id` column, `guest_cart_*` RPCs, and `merge_guest_cart` RPC
+- @ui-builder (Phase 2, pass 1) — `HeroCarousel.tsx`, `Quiz.tsx` at `/cuestionario`, `About.tsx` at `/nosotros`, 404 polish with SVG illustration, footer tagline update, `/carrito` un-gated, `sessionId.ts`, `CartProvider` guest branch
+- @ui-builder (Phase 2, pass 2) — quantity cap at 99, soft "Inicia sesión" guest banner on Cart page
+- @debugger (Phase 2) — services reveal animation fixed in `animations.css` (left/right/left slide-in, no flash on initial paint)
+- @documenter (Phase 3) — route table updated, agent notes closed, README Features section updated
+
+**Changes shipped:**
+1. Hero — Oscar photo removed, 4-slide lifestyle carousel (`HeroCarousel.tsx`)
+2. Quiz extracted to `/cuestionario` (`src/pages/Quiz.tsx`); `SucculentQuiz` gains optional `onClose` prop
+3. About Us page at `/nosotros` (`src/pages/About.tsx`)
+4. 404 page polished with SVG illustration and two CTAs
+5. Footer tagline updated to "Una marca que enseña a cuidar" (`src/lib/constants.ts`)
+6. Services reveal animation bug fixed (`src/styles/animations.css`)
+7. Guest cart via `session_id` in localStorage; `/carrito` is now public; merge-on-login via `merge_guest_cart` RPC; migration `20260417_005_guest_cart_session_id.sql`
+8. Quantity capped at 99 per item
+
+**Open items — action required:**
+- [ ] hero-1.webp through hero-4.webp: real lifestyle photos not yet available — placeholder images are in place. Oscar to provide final images (table, library, kitchen, bathroom settings).
+- [ ] Supabase migration `20260417_005_guest_cart_session_id.sql`: migration is written and reviewed but NOT applied. Oscar must approve schema + RLS changes, then Adrian applies via Supabase dashboard or CLI. See `docs/data-models.md` for full SQL details.
