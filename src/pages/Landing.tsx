@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import HeroCarousel from '../components/landing/HeroCarousel';
 import TestimonialForm from '../components/landing/TestimonialForm';
+import SectionRail from '../components/layout/SectionRail';
 import { useAuth } from '../core/auth/useAuth';
 import aboutImg from '../../assets/about-oscar.webp';
 import imgHercules from '../../assets/echeveria-hercules.webp';
@@ -164,18 +165,19 @@ export default function Landing() {
 
 
   // Scroll reveal observer for services slide-in + general reveals
+  // (re-fires on both enter and exit so animations replay on scroll up/down)
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => entries.forEach(e => {
+        const dir = (e.target as HTMLElement).dataset.reveal;
         if (e.isIntersecting) {
-          const dir = (e.target as HTMLElement).dataset.reveal;
-          if (dir === 'left') e.target.classList.add('reveal--left', 'is-visible');
-          else if (dir === 'right') e.target.classList.add('reveal--right', 'is-visible');
+          if (dir) e.target.classList.add('is-in');
           else e.target.classList.add('is-visible');
-          observer.unobserve(e.target);
+        } else {
+          e.target.classList.remove('is-in', 'is-visible');
         }
       }),
-      { threshold: 0.08 }
+      { threshold: 0.12 }
     );
     const t = setTimeout(() => {
       document.querySelectorAll('[data-reveal], .reveal').forEach(el => observer.observe(el));
@@ -192,7 +194,7 @@ export default function Landing() {
         <HeroCarousel />
 
         {/* How It Works */}
-        <section className="how-it-works">
+        <section id="how-it-works" className="how-it-works">
           <div className="how-it-works__inner">
             <p className="how-it-works__eyebrow">Cómo funciona</p>
             <h2 className="how-it-works__title">3 pasos para tu <span className="how-it-works__title-accent">suculenta</span></h2>
@@ -232,7 +234,7 @@ export default function Landing() {
         </section>
 
         {/* About */}
-        <section className="about">
+        <section id="about" className="about">
           <div className="about__inner">
             <p className="about__eyebrow">Nosotros</p>
             <h2 className="about__title">
@@ -261,7 +263,7 @@ export default function Landing() {
         </section>
 
         {/* Featured Products */}
-        <section className="featured">
+        <section id="featured" className="featured">
           <div className="featured__inner">
             <p className="featured__eyebrow">Catálogo</p>
             <h2 className="featured__title">
@@ -289,7 +291,7 @@ export default function Landing() {
         </section>
 
         {/* Souvenir Sections */}
-        <section className="souvenir-mini">
+        <section id="souvenirs" className="souvenir-mini">
           <div className="souvenir-mini__inner">
             <p className="souvenir-mini__eyebrow">Servicio</p>
             <h2 className="souvenir-mini__title">
@@ -345,7 +347,7 @@ export default function Landing() {
         </section>
 
         {/* Testimonials */}
-        <section className="testimonials" ref={testiRef}>
+        <section id="testimonials" className="testimonials" ref={testiRef}>
           <div className="testimonials__inner">
             <p className="testimonials__eyebrow">Testimonios</p>
             <h2 className="testimonials__title">
@@ -378,6 +380,18 @@ export default function Landing() {
           <a href={`https://wa.me/18495252430?text=${encodeURIComponent('Hola! Me interesan las suculentas de GREENLABS')}`} target="_blank" rel="noopener noreferrer" className="wa-cta__btn">Escríbenos por WhatsApp</a>
         </section>
       </div>
+
+      <SectionRail
+        sections={[
+          { id: 'hero',         label: 'Inicio' },
+          { id: 'how-it-works', label: 'Cómo funciona' },
+          { id: 'about',        label: 'Nosotros' },
+          { id: 'featured',     label: 'Catálogo' },
+          { id: 'souvenirs',    label: 'Eventos' },
+          { id: 'testimonials', label: 'Testimonios' },
+        ]}
+        hideAfterId="testimonials"
+      />
 
       {testimonialFormOpen && (
         <TestimonialForm
